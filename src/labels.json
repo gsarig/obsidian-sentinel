@@ -1,0 +1,5 @@
+{
+	"errorModifyFile": "Error modifying the file.",
+	"errorReadingFile": "Error reading the file.",
+	"errorProcessingFile": "Error processing the file."
+}

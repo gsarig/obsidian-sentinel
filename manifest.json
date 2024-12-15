@@ -1,0 +1,11 @@
+{
+	"id": "sentinel",
+	"name": "Sentinel",
+	"version": "1.0.0",
+	"minAppVersion": "1.7.7",
+	"description": "Trigger actions based on document visibility changes.",
+	"author": "Giorgos Sarigiannidis",
+	"authorUrl": "https://github.com/gsarig",
+	"fundingUrl": "https://www.paypal.com/donate/?hosted_button_id=CZSC6KDHD3WNC",
+	"isDesktopOnly": false
+}
