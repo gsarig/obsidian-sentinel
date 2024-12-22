@@ -1,5 +1,6 @@
 {
 	"errorModifyFile": "Error modifying the file.",
 	"errorReadingFile": "Error reading the file.",
-	"errorProcessingFile": "Error processing the file."
+	"errorProcessingFile": "Error processing the file.",
+	"invalidAppInstance": "The `app` instance is undefined or invalid."
 }

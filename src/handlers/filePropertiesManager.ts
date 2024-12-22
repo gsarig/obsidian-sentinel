@@ -1,5 +1,6 @@
 import * as yaml from "js-yaml"; // Import js-yaml for handling YAML metadata
-import { TFile, App } from "obsidian";
+import { TFile, App, Notice } from "obsidian";
+import {getLabel} from '../utils/getLabel';
 
 /**
  * Increment the view_count of a file by modifying its YAML frontmatter.
@@ -8,7 +9,7 @@ import { TFile, App } from "obsidian";
  */
 export async function incrementViewCount(file: TFile, app: App): Promise<void> {
     if (!app || !app.vault) {
-        console.error("The `app` instance is undefined or invalid.");
+        new Notice(getLabel('invalidAppInstance'));
         return;
     }
 
@@ -37,6 +38,4 @@ export async function incrementViewCount(file: TFile, app: App): Promise<void> {
 
     // Write the updated content back to the file
     await app.vault.modify(file, updatedContent);
-
-    console.log(`Updated "view_count" for file "${file.name}" to: ${frontmatter.view_count}`);
 }
