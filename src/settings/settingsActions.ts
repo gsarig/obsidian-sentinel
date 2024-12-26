@@ -134,7 +134,7 @@ export function addAction(
 	new Setting(actionContainer)
 		.addButton((button) =>
 			button
-				.setButtonText('Delete')
+				.setButtonText('Remove')
 				.setClass('mod-destructive')
 				.onClick(async () => {
 					plugin.settings.actions.splice(index, 1);
