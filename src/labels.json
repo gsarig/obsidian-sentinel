@@ -2,5 +2,14 @@
 	"errorModifyFile": "Error modifying the file.",
 	"errorReadingFile": "Error reading the file.",
 	"errorProcessingFile": "Error processing the file.",
-	"invalidAppInstance": "The `app` instance is undefined or invalid."
+	"invalidAppInstance": "The `app` instance is undefined or invalid.",
+	"commandNotFound": "Commmand {label} not  found",
+	"missingPropertyName": "Property name is missing",
+	"errorIncrementingPropery": "Error incrementing property: {label}",
+	"failedUpdatingProperty": "Failed to update property: {label}",
+	"failedExecutingCommand": "Failed to execute command: {label}",
+	"failedUpdatingFile": "Failed to update file: {label}",
+	"invalidDateFormat": "Invalid date format in template: {label}",
+	"invalidTimeFormat": "Invalid time format in template: {label}",
+	"invalidWhere": "Invalid regex or comparison error in 'where': {label}"
 }
