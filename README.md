@@ -1,6 +1,6 @@
 # Sentinel
 
-Sentinel is a plugin for [Obsidian](https://obsidian.md) that allows you to **update properties** or **run commands** based on document visibility changes. For example, you can add a `views` property that auto-increments every time a Note opens, a `modified` property that captures the current datetime when you exit a Note with modifications, run a Linter when a Note opens, and so on. 
+Sentinel is a plugin for [Obsidian](https://obsidian.md) that allows you to **update properties** or **run commands** based on document visibility changes. For example, you can add a `views` property that auto-increments every time a Note opens, a `modified` property that captures the current datetime when you exit a Note with modifications, run a Linter when a Note opens or exits, and so on. 
 
 ## How to use
 Go to the plugin's settings to add your actions. Each action includes the following fields:
@@ -9,7 +9,7 @@ Go to the plugin's settings to add your actions. Each action includes the follow
 	* **Opening a note**: The action will run every time a Note is being opened. 
     * **Opening a note (once)**: The action will run the first time a note opens, but not for any consecutive times. 
     * **Exiting a note (once)**: The action will run when the user exits a note for the first time.
-    * **Exiting a note with changes**: The action will run every time the user exits a note after doing some changes to it. 
+    * **Exiting a note with changes**: The action will run every time the user exits a note after having done changes to it. 
 * **What**: What should the action do. There are two options:
   * **Set a property**: You can update a specific property. By selecting this option, you will be asked to add the property's name, and the value. The value can either be a hardcoded string, or a dynamic variable, like `{{increment}}`, `{{date}}`, `{{time}}` or `{{title}}`. 
   * **Execute a command**: This will ask you to select a specific command from a dropdown, which will be automatically triggered. The list includes all the available commands from the Command Palette, so you should make sure to choose something that makes sense.  
