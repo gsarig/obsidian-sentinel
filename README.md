@@ -14,6 +14,8 @@ Go to the plugin's settings to add your actions. Each action includes the follow
   * **Set a property**: You can update a specific property. By selecting this option, you will be asked to add the property's name, and the value. The value can either be a hardcoded string, or a dynamic variable, like `{{increment}}`, `{{date}}`, `{{time}}` or `{{title}}`. 
   * **Execute a command**: This will ask you to select a specific command from a dropdown, which will be automatically triggered. The list includes all the available commands from the Command Palette, so you should make sure to choose something that makes sense.  
 
+![obsidian-sentinel.png](.github/assets/obsidian-sentinel.png)
+
 ## Available variables
 The property option accepts the following dynamic variables:
 ### Date/time
