@@ -2,6 +2,8 @@
 
 Sentinel is a plugin for [Obsidian](https://obsidian.md) that allows you to **update properties** or **run commands** based on document visibility changes. For example, you can add a `views` property that auto-increments every time a Note opens, a `modified` property that captures the current datetime when you exit a Note with modifications, run a Linter when a Note opens or exits, and so on. 
 
+![obsidian-sentinel-demo.mp4](.github/assets/obsidian-sentinel-demo.mp4)
+
 ## How to use
 Go to the plugin's settings to add your actions. Each action includes the following fields:
 * **Where**: Which notes should be targeted. If left empty, it will run on all Notes. You can target a specific Note by providing the Note's full title, or use a regex to target Notes with specific patterns on their title (example: `/^Recipe-*.*/` would target all notes with a title beginning with "Recipe-").
