@@ -36,7 +36,13 @@ If no other parameters are used, it will use by default "0" as the initial value
 You can use `{{title}}` to retrieve the title of the active note. Nothing fancy here, and I'm not sure when would one need it. I just kept it because it was among the officially supported [Template variables](https://help.obsidian.md/Plugins/Templates#Template+variables).
 
 ## How to install
+Currently, there are 2 ways to install the plugin:
 
+### Using BRAT
+1. Install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin.
+2. Add the Sentinel repository to BRAT: `gsarig/obsidian-sentinel`.
+
+### Manually
 1. Downlaod `main.js`, `styles.css`, `manifest.json` files from the [latest release](https://github.com/gsarig/obsidian-sentinel/releases).
 2. Create new folder inside your vault's `/.obsidian/plugins/` named  `sentinel` . If plugins folder doesn't exist, then create it manually. 
 3. Move downloaded files into the `/sentinel` folder. 
