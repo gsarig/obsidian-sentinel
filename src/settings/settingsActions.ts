@@ -1,7 +1,8 @@
-import { Setting, Command } from 'obsidian';
-import { SentinelPlugin } from './settingsConfig';
-import { Action } from '../types/actions';
+import {Setting} from 'obsidian';
+import {SentinelPlugin} from './settingsConfig';
+import {Action} from '../types/actions';
 import {AppWithCommands} from '../types/commands';
+import {CommandSuggest} from "./CommandSuggest";
 
 /**
  * Creates the UI for an action setting in the Settings Tab.
@@ -92,40 +93,8 @@ export function addAction(
 						action.commandId = value;
 						await plugin.saveSettings();
 					});
-
-				const suggestionContainer = actionContainer.createDiv('suggestion-container');
-
-				textComponent.inputEl.addEventListener('input', (e) => {
-					const currentValue = (e.target as HTMLInputElement).value.toLowerCase();
-					const commands = (plugin.app as AppWithCommands).commands.listCommands();
-
-					suggestionContainer.empty();
-
-					const suggestions = commands
-						.filter(
-							(cmd: Command) =>
-								cmd.name.toLowerCase().includes(currentValue) ||
-								cmd.id.toLowerCase().includes(currentValue)
-						)
-						.slice(0, 5);
-
-					suggestions.forEach((cmd: Command) => {
-						const suggestion = suggestionContainer.createDiv('suggestion-item');
-						suggestion.setText(cmd.name);
-						suggestion.addEventListener('click', async () => {
-							textComponent.setValue(cmd.id);
-							action.commandId = cmd.id;
-							await plugin.saveSettings();
-							suggestionContainer.empty();
-						});
-					});
-				});
-
-				document.addEventListener('click', (e) => {
-					if (!suggestionContainer.contains(e.target as Node)) {
-						suggestionContainer.empty();
-					}
-				});
+				const inputEl = textComponent.inputEl;
+				new CommandSuggest(plugin.app as AppWithCommands, inputEl);
 
 				return textComponent;
 			});

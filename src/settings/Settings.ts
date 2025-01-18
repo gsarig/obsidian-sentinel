@@ -14,10 +14,6 @@ export class SentinelSettings extends PluginSettingTab {
 		const {containerEl} = this;
 		containerEl.empty();
 
-		containerEl.createEl('p', {
-			text: 'Sentinel allows you to trigger actions based on document visibility changes.',
-		}).createEl('hr');
-
 		containerEl.createEl('h3', {text: 'Actions'});
 
 		if (this.plugin.settings.actions) {
@@ -28,7 +24,7 @@ export class SentinelSettings extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.addButton(button => button
-				.setButtonText('Add Action')
+				.setButtonText('Add action')
 				.setClass('mod-cta')
 				.onClick(async () => {
 					if (!this.plugin.settings.actions) {

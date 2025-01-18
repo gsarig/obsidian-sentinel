@@ -1,5 +1,4 @@
-import moment from "moment";
-import {Notice} from 'obsidian';
+import {Notice, moment} from 'obsidian';
 import {getLabel} from './getLabel';
 
 /**

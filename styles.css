@@ -38,17 +38,6 @@
 	opacity: 0;
 }
 
-.sentinel--action-container .suggestion-container:has(.suggestion-item) {
-	opacity: 1;
-}
-
-.sentinel--action-container .suggestion-item {
-}
-
-.sentinel--action-container .suggestion-item:hover {
-	background: var(--background-modifier-hover);
-}
-
 @media (min-width: 760px) {
 	.sentinel--action-container {
 		display: flex;
@@ -74,5 +63,8 @@
 	.sentinel--action-container .setting-item:nth-child(5) {
 		width: calc(40% - 0.5em);
 		margin-right: 0.75em;
+	}
+	.sentinel--action-container .setting-item:nth-child(5) {
+		margin-right: 0;
 	}
 }

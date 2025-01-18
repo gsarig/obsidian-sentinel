@@ -1,6 +1,6 @@
 {
 	"name": "sentinel",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Trigger actions based on document visibility changes.",
 	"main": "dist/main.js",
 	"scripts": {
@@ -13,14 +13,14 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/js-yaml": "^4.0.9",
-		"@types/node": "^22.10.2",
-		"@typescript-eslint/eslint-plugin": "8.18.2",
-		"@typescript-eslint/parser": "8.18.2",
+		"@types/node": "^22.10.7",
+		"@typescript-eslint/eslint-plugin": "8.20.0",
+		"@typescript-eslint/parser": "8.20.0",
 		"builtin-modules": "4.0.0",
 		"esbuild": "0.24.2",
 		"js-yaml": "^4.1.0",
 		"obsidian": "latest",
 		"tslib": "2.8.1",
-		"typescript": "5.7.2"
+		"typescript": "5.7.3"
 	}
 }
