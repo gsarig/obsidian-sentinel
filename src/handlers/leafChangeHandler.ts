@@ -2,6 +2,7 @@ import {App, TFile, WorkspaceLeaf, FileView} from 'obsidian';
 import {FileTrackingInfo} from '../types/FileTrackingInfo';
 import {safeReadFile} from './fileContentHandler';
 import {Action} from '../types/actions';
+import {isSplitViewActive} from '../utils/isSplitViewActive';
 
 export async function handleLeafChange(
 	leaf: WorkspaceLeaf,
@@ -50,7 +51,9 @@ export async function handleLeafChange(
 	const currentTime = Date.now();
 	const filePath = file.path;
 
-	onFileChanged(file, 'everyOpen');
+	if (!isSplitViewActive(app)) {
+		onFileChanged(file, 'everyOpen');
+	}
 
 	// Handle first-time file opening
 	let fileInfo = openedFiles.get(filePath);
