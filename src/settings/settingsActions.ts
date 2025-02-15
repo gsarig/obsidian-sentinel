@@ -30,8 +30,9 @@ export function addAction(
 		.addDropdown((dropdown) =>
 			dropdown
 				.addOptions({
-					everyOpen: 'Opening a note',
-					firstOpen: 'Opening a note (once)',
+					everyOpen: 'Accessing a note',
+					firstOpen: 'Opening a note once, resets on closing Obsidian',
+					firstOpenWithReset: 'Opening a note once, resets on closing the note',
 					firstLeave: 'Exiting a note (once)',
 					leaveChanged: 'Exiting a note with changes',
 				})
