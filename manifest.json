@@ -1,7 +1,7 @@
 {
 	"id": "sentinel",
 	"name": "Sentinel",
-	"version": "1.0.2",
+	"version": "1.0.1",
 	"minAppVersion": "1.7.7",
 	"description": "Trigger actions based on document visibility changes.",
 	"author": "Giorgos Sarigiannidis",
