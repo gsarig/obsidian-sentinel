@@ -8,8 +8,9 @@ https://github.com/user-attachments/assets/eb7f4ae7-2448-4ca1-913a-9b63d799f8bf
 Go to the plugin's settings to add your actions. Each action includes the following fields:
 * **Where**: Which notes should be targeted. If left empty, it will run on all Notes. You can target a specific Note by providing the Note's full title, or use a regex to target Notes with specific patterns on their title (example: `/^Recipe-*.*/` would target all notes with a title beginning with "Recipe-").
 * **When**: When should the action run. The options include:
-	* **Opening a note**: The action will run every time a Note is being opened. 
-    * **Opening a note (once)**: The action will run the first time a note opens, but not for any consecutive times. 
+	* **Accessing a note**: The action will run every time a Note is accessed. 
+    * **Opening a note once, reset on closing Obsidian**: The action will run the first time a note opens, but not for any consecutive times. It will re-trigger only after Obsidian is closed and re-open.
+    * **Opening a note once, reset on closing the note**: The action will run the first time a note opens, but not for any consecutive times. It will re-trigger when the note is closed and re-open.
     * **Exiting a note (once)**: The action will run when the user exits a note for the first time.
     * **Exiting a note with changes**: The action will run every time the user exits a note after having done changes to it. 
 * **What**: What should the action do. There are two options:
@@ -36,7 +37,12 @@ If no other parameters are used, it will use by default "0" as the initial value
 You can use `{{title}}` to retrieve the title of the active note. Nothing fancy here, and I'm not sure when would one need it. I just kept it because it was among the officially supported [Template variables](https://help.obsidian.md/Plugins/Templates#Template+variables).
 
 ## How to install
-Currently, there are 2 ways to install the plugin:
+Currently, there are 3 ways to install the plugin:
+
+### Standard install (recommended)
+1. Open the Settings panel in Obsidian, and go to the "Community plugins" section.
+2. Click the "Browse" button and search for "Sentinel".
+3. Install and enable the plugin.
 
 ### Using BRAT
 1. Install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin.

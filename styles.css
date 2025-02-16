@@ -51,12 +51,16 @@
 		align-items: flex-start;
 	}
 
+	.sentinel--action-container .setting-item:nth-child(1) {
+		width: calc(35% - 0.5em);
+	}
+
 	.sentinel--action-container .setting-item:nth-child(2) {
-		width: calc(30% - 0.5em);
+		width: calc(43% - 0.5em);
 	}
 
 	.sentinel--action-container .setting-item:nth-child(3) {
-		width: calc(30% - 0.5em);
+		width: calc(22% - 0.5em);
 	}
 
 	.sentinel--action-container .setting-item:nth-child(4),
@@ -64,6 +68,7 @@
 		width: calc(40% - 0.5em);
 		margin-right: 0.75em;
 	}
+
 	.sentinel--action-container .setting-item:nth-child(5) {
 		margin-right: 0;
 	}

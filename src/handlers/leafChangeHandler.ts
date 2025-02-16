@@ -2,13 +2,15 @@ import {App, TFile, WorkspaceLeaf, FileView} from 'obsidian';
 import {FileTrackingInfo} from '../types/FileTrackingInfo';
 import {safeReadFile} from './fileContentHandler';
 import {Action} from '../types/actions';
+import {isSplitViewActive} from '../utils/isSplitViewActive';
 
 export async function handleLeafChange(
 	leaf: WorkspaceLeaf,
 	app: App,
 	lastActiveLeaf: FileTrackingInfo | null,
 	openedFiles: Map<string, FileTrackingInfo>,
-	onFileChanged: (file: TFile, triggerType: Action['when']) => void
+	onFileChanged: (file: TFile, triggerType: Action['when']) => void,
+	everOpenedFiles: Set<string>
 ) {
 	// Handle leave event for the previous file
 	if (lastActiveLeaf) {
@@ -16,15 +18,12 @@ export async function handleLeafChange(
 		if (previousFile instanceof TFile) {
 			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
 
-			// Detect if the previous file has been modified.
+			// Detect if the previous file has been modified
 			if (
 				previousFileInfo &&
 				previousFileInfo.lastModified !== previousFile.stat.mtime
 			) {
-				// Trigger leaveChanged when exiting a note with changes
 				onFileChanged(previousFile, 'leaveChanged');
-
-				// Synchronize the tracking info with the current state after the change is processed
 				previousFileInfo.lastModified = previousFile.stat.mtime;
 			}
 
@@ -50,7 +49,9 @@ export async function handleLeafChange(
 	const currentTime = Date.now();
 	const filePath = file.path;
 
-	onFileChanged(file, 'everyOpen');
+	if (!isSplitViewActive(app)) {
+		onFileChanged(file, 'everyOpen');
+	}
 
 	// Handle first-time file opening
 	let fileInfo = openedFiles.get(filePath);
@@ -62,7 +63,7 @@ export async function handleLeafChange(
 
 		fileInfo = {
 			path: filePath,
-			lastModified: file.stat.mtime, // Initial state of the file.
+			lastModified: file.stat.mtime,
 			lastOpened: currentTime,
 			firstTimeOpened: true,
 			hasBlurred: false,
@@ -70,22 +71,35 @@ export async function handleLeafChange(
 		};
 		openedFiles.set(filePath, fileInfo);
 
-		// Trigger firstOpen for new files
-		onFileChanged(file, 'firstOpen');
+		// First, handle firstOpen if it hasn't been seen this session
+		if (!everOpenedFiles.has(filePath)) {
+			onFileChanged(file, 'firstOpen');
+			everOpenedFiles.add(filePath);
+		}
+
+
+		// Always trigger firstOpenWithReset when the file is not in currently opened files
+		onFileChanged(file, 'firstOpenWithReset');
+
+		// Only trigger firstOpen if the file hasn't been opened in this session
+		if (!everOpenedFiles.has(filePath)) {
+			onFileChanged(file, 'firstOpen');
+			everOpenedFiles.add(filePath);
+		}
+
 	} else {
-		// If file is revisited, reset lastModified to avoid double-counting.
+		// If file is revisited, reset lastModified to avoid double-counting
 		if (fileInfo.lastModified !== file.stat.mtime) {
 			fileInfo.lastModified = file.stat.mtime;
 		}
 
-		// Mark file as reopened.
+		// Mark file as reopened
 		fileInfo.lastOpened = currentTime;
 		fileInfo.firstTimeOpened = false;
 	}
 
-	// Update tracking to reflect current state.
+	// Update tracking to reflect current state
 	fileInfo.lastModified = file.stat.mtime;
 
-	// Return the updated file info.
 	return fileInfo;
 }
