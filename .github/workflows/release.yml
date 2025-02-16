@@ -28,7 +28,15 @@ jobs:
         run: |
           tag="${GITHUB_REF#refs/tags/}"
 
-          gh release create "$tag" \
-            --title="$tag" \
-            --draft \
-            main.js manifest.json styles.css
+            if [[ $tag == *"beta"* ]]; then
+              gh release create "$tag" \
+                --title="$tag" \
+                --draft \
+                --prerelease \
+                main.js manifest-beta.json styles.css
+            else
+              gh release create "$tag" \
+                --title="$tag" \
+                --draft \
+                main.js manifest.json styles.css
+            fi
