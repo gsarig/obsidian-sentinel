@@ -50,6 +50,7 @@ export async function handleLeafChange(
 	const filePath = file.path;
 
 	if (!isSplitViewActive(app)) {
+		onFileChanged(file, 'everyLeave');
 		onFileChanged(file, 'everyOpen');
 	}
 
