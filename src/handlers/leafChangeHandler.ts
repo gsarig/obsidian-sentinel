@@ -18,6 +18,8 @@ export async function handleLeafChange(
 		if (previousFile instanceof TFile) {
 			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
 
+			onFileChanged(previousFile, 'everyLeave');
+
 			// Detect if the previous file has been modified
 			if (
 				previousFileInfo &&

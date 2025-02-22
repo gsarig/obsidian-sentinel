@@ -15,7 +15,7 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 
 		// Log each matching action.
 		for (const action of matchingActions) {
-			if (!shouldRunAction(action.where, file)) {
+			if (!shouldRunAction(action.where, file, app)) {
 				continue;
 			}
 			if (action.what === 'property' && action.propertyName && action.propertyValue) {
