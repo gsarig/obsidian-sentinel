@@ -17,8 +17,10 @@ Go to the plugin's settings to add your actions. Each action includes the follow
 	* **Accessing a note**: The action will run every time a Note is accessed. 
     * **Opening a note once, reset on closing Obsidian**: The action will run the first time a note opens, but not for any consecutive times. It will re-trigger only after Obsidian is closed and re-open.
     * **Opening a note once, reset on closing the note**: The action will run the first time a note opens, but not for any consecutive times. It will re-trigger when the note is closed and re-open.
-    * **Exiting a note (once)**: The action will run when the user exits a note for the first time.
-    * **Exiting a note with changes**: The action will run every time the user exits a note after having done changes to it. 
+    * **Closing a note**: The action will run every time you explicitly close a note (not just switching between open notes).
+    * **Leaving a note**: The action will run every time you leave a note, even if you keep it open and switch to another tab.
+    * **Leaving a note once, reset on reopening Obsidian**: The action will run when the user exits a note for the first time. It will  reset if you close Obsidian and trigger again on re-open.
+    * **Leaving a note with changes**: The action will run every time the user exits a note after having done changes to it. 
 * **What**: What should the action do. There are two options:
   * **Set a property**: You can update a specific property. By selecting this option, you will be asked to add the property's name, and the value. The value can either be a hardcoded string, or a dynamic variable, like `{{increment}}`, `{{date}}`, `{{time}}` or `{{title}}`. 
   * **Execute a command**: This will ask you to select a specific command from a dropdown, which will be automatically triggered. The list includes all the available commands from the Command Palette, so you should make sure to choose something that makes sense.  

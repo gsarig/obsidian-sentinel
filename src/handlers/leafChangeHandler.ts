@@ -16,9 +16,18 @@ export async function handleLeafChange(
 	if (lastActiveLeaf) {
 		const previousFile = app.vault.getAbstractFileByPath(lastActiveLeaf.path);
 		if (previousFile instanceof TFile) {
-			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
+			// Check if the file is still open in any leaf
+            const isFileStillOpen = app.workspace.getLeavesOfType('markdown')
+                .some(leaf => (leaf.view as FileView).file?.path === previousFile.path);
+
+            if (!isFileStillOpen) {
+				// File is actually closed, not just switched
+				onFileChanged(previousFile, 'everyClose');
+			}
 
 			onFileChanged(previousFile, 'everyLeave');
+			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
+
 
 			// Detect if the previous file has been modified
 			if (

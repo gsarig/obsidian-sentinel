@@ -52,11 +52,11 @@
 	}
 
 	.sentinel--action-container .setting-item:nth-child(1) {
-		width: calc(35% - 0.5em);
+		width: calc(33% - 0.5em);
 	}
 
 	.sentinel--action-container .setting-item:nth-child(2) {
-		width: calc(43% - 0.5em);
+		width: calc(45% - 0.5em);
 	}
 
 	.sentinel--action-container .setting-item:nth-child(3) {
