@@ -66,6 +66,7 @@ You can use BRAT to test beta versions of the plugin:
 2. Check the [manifest-beta.json](https://github.com/gsarig/obsidian-sentinel/blob/main/manifest-beta.json) file to see the current beta version. It should be something like `1.0.2-beta.1`.
 3. Go to BRAT and add the plugin using the option "Add Beta plugin with frozen version":
 ![obsidian-sentinel-beta-testing.png](.github/assets/obsidian-sentinel-beta-testing.png)
+4. Restart your vault.
 
 ## Feedback and Support
 
