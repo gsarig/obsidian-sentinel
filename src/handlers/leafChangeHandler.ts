@@ -87,16 +87,9 @@ export async function handleLeafChange(
 			onFileChanged(file, 'firstOpen');
 			everOpenedFiles.add(filePath);
 		}
-
-
+		
 		// Always trigger firstOpenWithReset when the file is not in currently opened files
 		onFileChanged(file, 'firstOpenWithReset');
-
-		// Only trigger firstOpen if the file hasn't been opened in this session
-		if (!everOpenedFiles.has(filePath)) {
-			onFileChanged(file, 'firstOpen');
-			everOpenedFiles.add(filePath);
-		}
 
 	} else {
 		// If file is revisited, reset lastModified to avoid double-counting

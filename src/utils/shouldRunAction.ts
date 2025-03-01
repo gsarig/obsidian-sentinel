@@ -4,8 +4,17 @@ import {getLabel} from './getLabel';
 function isTagMatch(value: string, file: TFile, app: App): boolean {
 	if (value.startsWith('#') && !value.includes(' ')) {
 		const tag = value.slice(1); // Remove the # prefix
-		const fileTags = app.metadataCache.getFileCache(file)?.tags?.map((t: TagCache) => t.tag.slice(1)) || [];
-		return fileTags.includes(tag);
+		const fileCache = app.metadataCache.getFileCache(file);
+
+		// Check inline tags
+        const inlineTags = fileCache?.tags?.map((t: TagCache) => t.tag.slice(1)) || [];
+
+        // Check frontmatter tags
+        const frontmatterTags = fileCache?.frontmatter?.tags || [];
+
+        // Combine both tag sources and check if the tag exists in either
+        const allTags = [...inlineTags, ...(Array.isArray(frontmatterTags) ? frontmatterTags : [frontmatterTags])];
+        return allTags.includes(tag);
 	}
 	return false;
 }
