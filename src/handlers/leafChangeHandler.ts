@@ -16,7 +16,18 @@ export async function handleLeafChange(
 	if (lastActiveLeaf) {
 		const previousFile = app.vault.getAbstractFileByPath(lastActiveLeaf.path);
 		if (previousFile instanceof TFile) {
+			// Check if the file is still open in any leaf
+            const isFileStillOpen = app.workspace.getLeavesOfType('markdown')
+                .some(leaf => (leaf.view as FileView).file?.path === previousFile.path);
+
+            if (!isFileStillOpen) {
+				// File is actually closed, not just switched
+				onFileChanged(previousFile, 'everyClose');
+			}
+
+			onFileChanged(previousFile, 'everyLeave');
 			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
+
 
 			// Detect if the previous file has been modified
 			if (
@@ -76,16 +87,9 @@ export async function handleLeafChange(
 			onFileChanged(file, 'firstOpen');
 			everOpenedFiles.add(filePath);
 		}
-
-
+		
 		// Always trigger firstOpenWithReset when the file is not in currently opened files
 		onFileChanged(file, 'firstOpenWithReset');
-
-		// Only trigger firstOpen if the file hasn't been opened in this session
-		if (!everOpenedFiles.has(filePath)) {
-			onFileChanged(file, 'firstOpen');
-			everOpenedFiles.add(filePath);
-		}
 
 	} else {
 		// If file is revisited, reset lastModified to avoid double-counting

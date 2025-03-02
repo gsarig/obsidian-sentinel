@@ -33,8 +33,10 @@ export function addAction(
 					everyOpen: 'Accessing a note',
 					firstOpen: 'Opening a note once, reset on closing Obsidian',
 					firstOpenWithReset: 'Opening a note once, reset on closing the note',
-					firstLeave: 'Exiting a note (once)',
-					leaveChanged: 'Exiting a note with changes',
+					everyClose: 'Closing a note',
+					everyLeave: 'Leaving a note',
+					firstLeave: 'Leaving a note once, reset on reopening Obsidian',
+					leaveChanged: 'Leaving a note with changes',
 				})
 				.setValue(action.when)
 				.onChange(async (value: Action['when']) => {
