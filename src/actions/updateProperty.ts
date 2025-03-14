@@ -39,7 +39,8 @@ export async function updateProperty(
 	}
 
 	// Parse the template to handle other placeholders (e.g., {{date}}, {{time}}, {{title}}).
-	const parsedTemplate = parseTemplate(template);
+	const fileTitle = file.basename || '';
+	const parsedTemplate = parseTemplate(template, fileTitle);
 
 	// Update property with the parsed template value.
 	try {
