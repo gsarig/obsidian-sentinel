@@ -24,7 +24,8 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 						file,
 						app,
 						action.propertyName,
-						action.propertyValue
+						action.propertyValue,
+						action.skipExisting || false
 					);
 				} catch (error) {
 					new Notice(getLabel('failedUpdatingProperty', {
