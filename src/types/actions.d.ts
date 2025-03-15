@@ -5,6 +5,7 @@ interface Action {
 	propertyName?: string;
 	propertyValue?: string;
 	commandId?: string;
+	skipExisting?: boolean;
 }
 
 export interface SentinelPluginSettings {
