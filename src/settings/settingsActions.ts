@@ -84,6 +84,15 @@ export function addAction(
 					action.propertyValue = value;
 					await plugin.saveSettings();
 				})
+			 );
+
+		new Setting(actionContainer)
+			.setName('Skip Existing')
+			.addToggle((toggle) =>
+				toggle.setValue(action.skipExisting || false).onChange(async (value) => {
+					action.skipExisting = value;
+					await plugin.saveSettings();
+				})
 			);
 	} else {
 		new Setting(actionContainer)
