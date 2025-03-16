@@ -10,12 +10,14 @@ import {parseTemplate} from '../utils/parseTemplate';
  * @param app The Obsidian app instance.
  * @param propertyName The name of the property to be updated.
  * @param template The template string containing placeholders.
+ * @param skipExisting If true, don't update properties that already exist.
  */
 export async function updateProperty(
 	file: TFile,
 	app: App,
 	propertyName?: string,
-	template?: string
+	template?: string,
+	skipExisting: boolean = false
 ): Promise<boolean> {
 
 	if (!app?.vault || !propertyName || !template) {
@@ -44,7 +46,7 @@ export async function updateProperty(
 
 	// Update property with the parsed template value.
 	try {
-		await propertyUpdater(file, app, propertyName, () => parsedTemplate);
+		await propertyUpdater(file, app, propertyName, () => parsedTemplate, skipExisting);
 		return true;
 	} catch (error) {
 		return false;
