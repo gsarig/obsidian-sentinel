@@ -68,12 +68,18 @@
 		width: calc(33% - 0.5em);
 		margin-right: 0.75em;
 	}
-	
+
+	.sentinel--action-container .setting-item:nth-child(5):has(button),
 	.sentinel--action-container .setting-item:nth-child(6) {
 		width: calc(14% - 0.5em);
 		margin-right: 0;
 	}
 	.sentinel--action-container .setting-item:nth-child(6) .setting-item-control {
 		width: fit-content;
+	}
+
+	/* Give it more width if it is the Command field */
+	.sentinel--action-container .setting-item:nth-child(4):has(input[placeholder]) {
+ 		width: calc(79% - 0.75em);
 	}
 }
