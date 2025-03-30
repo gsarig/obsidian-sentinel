@@ -37,6 +37,7 @@ export function addAction(
 					everyLeave: 'Leaving a note',
 					firstLeave: 'Leaving a note once, reset on reopening Obsidian',
 					leaveChanged: 'Leaving a note with changes',
+					leaveChangedNoFrontmatter: 'Leaving a note with changes, exclude frontmatter',
 				})
 				.setValue(action.when)
 				.onChange(async (value: Action['when']) => {
