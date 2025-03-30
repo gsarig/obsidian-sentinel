@@ -3,6 +3,7 @@ import {FileTrackingInfo} from '../types/FileTrackingInfo';
 import {safeReadFile} from './fileContentHandler';
 import {Action} from '../types/actions';
 import {isSplitViewActive} from '../utils/isSplitViewActive';
+import {stripFrontmatter} from '../utils/stripFrontmatter';
 
 export async function handleLeafChange(
 	leaf: WorkspaceLeaf,
@@ -34,6 +35,22 @@ export async function handleLeafChange(
 				previousFileInfo &&
 				previousFileInfo.lastModified !== previousFile.stat.mtime
 			) {
+				// File has been modified, check if changes are only in frontmatter
+				const currentContent = await safeReadFile(app, previousFile);
+
+				if (currentContent !== null && previousFileInfo.lastContent) {
+					// Check if content outside frontmatter has changed
+					const previousContentWithoutFrontmatter = stripFrontmatter(previousFileInfo.lastContent);
+					const currentContentWithoutFrontmatter = stripFrontmatter(currentContent);
+
+					// Only trigger if content outside frontmatter changed
+					if (previousContentWithoutFrontmatter !== currentContentWithoutFrontmatter) {
+						onFileChanged(previousFile, 'leaveChangedNoFrontmatter');
+					}
+
+					// Update stored content regardless
+					previousFileInfo.lastContent = currentContent;
+				}
 				onFileChanged(previousFile, 'leaveChanged');
 				previousFileInfo.lastModified = previousFile.stat.mtime;
 			}

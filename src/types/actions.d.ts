@@ -1,6 +1,6 @@
 interface Action {
 	where: string;
-	when: 'everyOpen' | 'firstLeave' | 'firstOpen' | 'everyLeave' | 'everyClose' | 'leaveChanged' | 'firstOpenWithReset';
+	when: 'everyOpen' | 'firstLeave' | 'firstOpen' | 'everyLeave' | 'everyClose' | 'leaveChanged' | 'leaveChangedNoFrontmatter' | 'firstOpenWithReset';
 	what: 'property' | 'command';
 	propertyName?: string;
 	propertyValue?: string;
