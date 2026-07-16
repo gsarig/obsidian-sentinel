@@ -86,12 +86,12 @@ describe("Leave triggers", function () {
 		expect((await frontmatterOf("A.md"))?.firstLeft).toBe(1);
 	});
 
-	// Skipped pending Batch E redesign: the eventTracker.ts fix that made
-	// this pass also introduced a second, distinct bug (a spurious
-	// self-leave fire on rapid back-to-back new-tab opens, no settle pause
-	// between them), which broke the firstLeave test above. Reverted rather
-	// than shipped; reproduces the new-tab double-fire finding once a fix
-	// that handles both cases is designed.
+	// Regression test for the new-tab double-fire: a single logical leaf
+	// transition emits multiple active-leaf-change events, which previously
+	// re-fired leave triggers for the note being left. Fixed in eventTracker
+	// (serialized handling, unconditional lastActiveLeaf consume) and
+	// leafChangeHandler (same-file duplicate guard); the rapid-succession
+	// variant is covered by the next test.
 	it("does not double-fire leave triggers when opening a note into a new tab", async function () {
 		await setActions([
 			{ when: "everyLeave", what: "property", propertyName: "left", propertyValue: "{{increment}}" },

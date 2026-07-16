@@ -8,7 +8,7 @@ import '../styles.css';
 export default class Sentinel extends Plugin {
 
 	settings: SentinelPluginSettings;
-	private stopActionManager: () => void;
+	private stopActionManager?: () => void;
 
 	async onload() {
 

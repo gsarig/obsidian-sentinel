@@ -18,9 +18,18 @@ export function eventTracker(
     // emit several active-leaf-change events milliseconds apart, and letting
     // them interleave at the handler's awaits corrupts the tracking state
     // (e.g. double-fired leave triggers).
+    // Set on cleanup so queued events cannot mutate cleared state or fire
+    // actions after the plugin has been unloaded.
+    let disposed = false;
     let processing: Promise<void> = Promise.resolve();
     const leafChangeHandler = (leaf: WorkspaceLeaf) => {
+        if (disposed) {
+            return;
+        }
         processing = processing.then(async () => {
+            if (disposed) {
+                return;
+            }
             // Always consume lastActiveLeaf, even when the new leaf holds no
             // file: once a note's leave events have been processed it must
             // stop being "the note we are leaving", or the next event
@@ -33,8 +42,9 @@ export function eventTracker(
                 onFileChanged,
                 everOpenedFiles
             );
-        }).catch(() => {
-            // Never break the chain; a failed event must not stall tracking.
+        }).catch((error) => {
+            // Keep the chain alive; a failed event must not stall tracking.
+            console.error('Sentinel: error while processing leaf change', error);
         });
     };
 
@@ -61,6 +71,8 @@ export function eventTracker(
 
     // Cleanup function
     return () => {
+        disposed = true;
+
         openedFiles.forEach(fileInfo => {
             if (fileInfo.hasChangesTimeout) {
                 clearTimeout(fileInfo.hasChangesTimeout);
