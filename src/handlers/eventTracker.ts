@@ -14,19 +14,28 @@ export function eventTracker(
 
     if (!onFileChanged) return () => {};
 
-     const leafChangeHandler = async (leaf: WorkspaceLeaf) => {
-        // Removed the premature everOpenedFiles update
-        const newLastActiveLeaf = await handleLeafChange(
-            leaf,
-            app,
-            lastActiveLeaf,
-            openedFiles,
-            onFileChanged,
-            everOpenedFiles
-        );
-        if (newLastActiveLeaf) {
-            lastActiveLeaf = newLastActiveLeaf;
-        }
+    // Events are processed strictly in order: a single leaf transition can
+    // emit several active-leaf-change events milliseconds apart, and letting
+    // them interleave at the handler's awaits corrupts the tracking state
+    // (e.g. double-fired leave triggers).
+    let processing: Promise<void> = Promise.resolve();
+    const leafChangeHandler = (leaf: WorkspaceLeaf) => {
+        processing = processing.then(async () => {
+            // Always consume lastActiveLeaf, even when the new leaf holds no
+            // file: once a note's leave events have been processed it must
+            // stop being "the note we are leaving", or the next event
+            // re-fires them.
+            lastActiveLeaf = await handleLeafChange(
+                leaf,
+                app,
+                lastActiveLeaf,
+                openedFiles,
+                onFileChanged,
+                everOpenedFiles
+            );
+        }).catch(() => {
+            // Never break the chain; a failed event must not stall tracking.
+        });
     };
 
     const layoutChangeHandler = () => {

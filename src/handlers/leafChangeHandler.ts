@@ -13,6 +13,15 @@ export async function handleLeafChange(
 	onFileChanged: (file: TFile, triggerType: Action['when']) => void,
 	everOpenedFiles: Set<string>
 ) {
+	// A single logical transition can emit multiple active-leaf-change events
+	// (opening a file in a new tab fires once for the leaf activation and once
+	// for the loaded view, and depending on timing both may already report the
+	// file). An event for the note we already track as active is a duplicate:
+	// process nothing, or its leave triggers would fire against itself.
+	if (lastActiveLeaf && leaf?.view instanceof FileView && leaf.view.file?.path === lastActiveLeaf.path) {
+		return lastActiveLeaf;
+	}
+
 	// Handle leave event for the previous file
 	if (lastActiveLeaf) {
 		const previousFile = app.vault.getAbstractFileByPath(lastActiveLeaf.path);
