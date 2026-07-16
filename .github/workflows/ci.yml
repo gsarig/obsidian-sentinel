@@ -34,6 +34,7 @@ jobs:
         env:
           OBSIDIAN_VERSIONS: "earliest/earliest latest/latest"
         run: |
+          set -o pipefail
           npx tsx wdio.conf.mts | grep 'obsidian-cache-key:' > obsidian-versions-lock.txt
           # Delete the cache created by wdio.conf.mts so it doesn't conflict with restore
           rm -rf .obsidian-cache
