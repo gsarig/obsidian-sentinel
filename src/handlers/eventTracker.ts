@@ -21,6 +21,14 @@ export function eventTracker(
     // Set on cleanup so queued events cannot mutate cleared state or fire
     // actions after the plugin has been unloaded.
     let disposed = false;
+
+    // Final disposal gate: handleLeafChange awaits internally, so cleanup can
+    // land while one event is mid-flight; this stops its actions from firing.
+    const guardedOnFileChanged: typeof onFileChanged = (file, triggerType) => {
+        if (!disposed) {
+            onFileChanged(file, triggerType);
+        }
+    };
     let processing: Promise<void> = Promise.resolve();
     const leafChangeHandler = (leaf: WorkspaceLeaf) => {
         if (disposed) {
@@ -39,7 +47,7 @@ export function eventTracker(
                 app,
                 lastActiveLeaf,
                 openedFiles,
-                onFileChanged,
+                guardedOnFileChanged,
                 everOpenedFiles
             );
         }).catch((error) => {
