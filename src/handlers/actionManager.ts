@@ -9,7 +9,7 @@ import {getLabel} from '../utils/getLabel';
 
 export function actionManager(app: App, settings: SentinelPluginSettings) {
 
-	eventTracker(app, async (file, triggerType) => {
+	return eventTracker(app, async (file, triggerType) => {
 		// Loop through all actions in settings
 		const matchingActions = settings.actions.filter(action => action.when === triggerType);
 

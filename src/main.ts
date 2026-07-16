@@ -8,6 +8,7 @@ import '../styles.css';
 export default class Sentinel extends Plugin {
 
 	settings: SentinelPluginSettings;
+	private stopActionManager: () => void;
 
 	async onload() {
 
@@ -21,7 +22,11 @@ export default class Sentinel extends Plugin {
 		this.addSettingTab(new SentinelSettings(this.app, this));
 
 		// Handle the actions.
-		actionManager(this.app, this.settings);
+		this.stopActionManager = actionManager(this.app, this.settings);
+	}
+
+	onunload() {
+		this.stopActionManager?.();
 	}
 
 	async saveSettings() {
