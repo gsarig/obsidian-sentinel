@@ -50,7 +50,7 @@ jobs:
       - name: "Setup virtual graphics"
         run: |
           sudo apt-get update -q
-          sudo apt-get install -q xvfb herbstluftwm dzen2 x11-xserver-utils
+          sudo apt-get install -q -y xvfb herbstluftwm dzen2 x11-xserver-utils
 
           export DISPLAY=:99
           echo "DISPLAY=$DISPLAY" >> "$GITHUB_ENV"
