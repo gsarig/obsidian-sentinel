@@ -41,7 +41,6 @@ npm install       # install deps
 npm run dev       # watch build into the plugin folder
 npm run build     # tsc typecheck + production bundle
 npm test          # run the Vitest unit suite
-npm run lint      # ESLint
 ```
 
 ## Testing
