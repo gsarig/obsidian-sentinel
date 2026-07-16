@@ -28,6 +28,10 @@ jobs:
       # directly, which logs the resolved Obsidian versions to test (see the
       # `if (env.CI)` block in wdio.conf.mts). We use that output as the cache key.
       - name: "Get Obsidian cache key"
+        # Must resolve the same version set as the e2e step below, or the
+        # cache key drifts from the cache contents.
+        env:
+          OBSIDIAN_VERSIONS: "earliest/earliest latest/latest"
         run: |
           npx tsx wdio.conf.mts | grep 'obsidian-cache-key:' > obsidian-versions-lock.txt
           # Delete the cache created by wdio.conf.mts so it doesn't conflict with restore
@@ -45,7 +49,7 @@ jobs:
       - name: "Setup virtual graphics"
         run: |
           sudo apt-get update -q
-          sudo apt-get install -q herbstluftwm dzen2 x11-xserver-utils
+          sudo apt-get install -q xvfb herbstluftwm dzen2 x11-xserver-utils
 
           export DISPLAY=:99
           echo "DISPLAY=$DISPLAY" >> "$GITHUB_ENV"
