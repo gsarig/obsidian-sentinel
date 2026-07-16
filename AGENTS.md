@@ -41,6 +41,7 @@ npm install       # install deps
 npm run dev       # watch build into the plugin folder
 npm run build     # tsc typecheck + production bundle
 npm test          # run the Vitest unit suite
+npm run test:e2e  # run the wdio end-to-end suite (drives a real Obsidian)
 ```
 
 ## Testing
@@ -48,7 +49,9 @@ npm test          # run the Vitest unit suite
 Two layers. Run both before pushing.
 
 1. **Unit tests (`npm test`, Vitest).** Cover the pure logic where regressions actually happen: targeting rules, template parsing, frontmatter stripping, label substitution. The `obsidian` module is aliased to `test/mocks/obsidian.ts` (a `Notice` stub plus real `moment`), so tests run without Obsidian. When you change targeting or template behaviour, add or update a test in the same commit.
-2. **In-app verification.** Build into a dev vault, reload Obsidian, and exercise the affected triggers (open, close, leave a note; confirm properties change and commands fire).
+2. **E2E tests (`npm run test:e2e`, wdio-obsidian-service).** Drive a real sandboxed Obsidian against the fixture vault in `test/vaults/simple/`: every trigger type, targeting modes, actions, the settings UI, and regression tests. Rebuild (`npm run build`) first when `src/` changed, since the suite loads the bundled `main.js`.
+
+For manual checks beyond the suites, build into a dev vault, reload Obsidian, and exercise the affected triggers directly.
 
 ## Manifest rules (`manifest.json`)
 
