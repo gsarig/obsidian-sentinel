@@ -20,6 +20,7 @@ export async function propertyUpdater(
 				new Notice(getLabel('failedUpdatingProperty', {
 					label: propertyName,
 				}));
+				return;
 			}
 			const baseValue = typeof currentValue === 'number' || typeof currentValue === 'string'
 				? currentValue
