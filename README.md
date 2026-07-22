@@ -37,7 +37,7 @@ You can use `{{date}}` and `{{time}}` interchangeably with format strings, for e
 Essentially, it follows the same patterns described in the [Template variables](https://help.obsidian.md/Plugins/Templates#Template+variables) section of the Obsidian Help pages. 
 
 ### Increment
-Using `{{increment}}` you can increment a specific value. This can be handy if you want to add a property for tracking the views of a Note. The variable allows you to set the starting value and the increment step, with the following pattern: `{{increment:<initial_value>,<increment_step>}}`. For example, `{{increment:100,10}}`, would use "100" as its initial value, and increment by "10" (so, on your next visit, the value should be "110", then "120" and so on). 
+Using `{{increment}}` you can increment a specific value. This can be handy if you want to add a property for tracking the views of a Note. The variable allows you to set the starting value and the increment step, with the following pattern: `{{increment:<initial_value>,<increment_step>}}`. The step is applied on every triggering visit, including the first: `{{increment:100,10}}` starts counting from "100" and adds "10" per visit, so the first visit writes "110", the next "120", and so on. 
 
 If no other parameters are used, it will use by default "0" as the initial value and "1" as the increment step. 
 

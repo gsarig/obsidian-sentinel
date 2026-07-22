@@ -88,7 +88,7 @@ export function addAction(
 			 );
 
 		new Setting(actionContainer)
-			.setName('Skip Existing')
+			.setName('Skip existing')
 			.addToggle((toggle) =>
 				toggle.setValue(action.skipExisting || false).onChange(async (value) => {
 					action.skipExisting = value;
@@ -96,7 +96,7 @@ export function addAction(
 				})
 			);
 	} else {
-		new Setting(actionContainer)
+		const commandSetting = new Setting(actionContainer)
 			.setName('Command')
 			.addText((text) => {
 				const textComponent = text
@@ -111,6 +111,9 @@ export function addAction(
 
 				return textComponent;
 			});
+		// Styling hook: lets the stylesheet size the command field and the
+		// remove button without resorting to :has() selectors.
+		commandSetting.settingEl.addClass('sentinel--action-command');
 	}
 
 	new Setting(actionContainer)

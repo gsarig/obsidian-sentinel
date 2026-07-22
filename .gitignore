@@ -19,5 +19,9 @@ main.css
 # obsidian
 data.json
 
+# wdio e2e: downloaded Obsidian versions + run artifacts
+.obsidian-cache
+obsidian-versions-lock.txt
+
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store

@@ -6,7 +6,7 @@
 
 .sentinel--action-container .setting-item {
 	border-top: none;
-	padding: 0.5em 0 1em 0;
+	padding: 0.5em 0 1em;
 }
 
 
@@ -69,7 +69,8 @@
 		margin-right: 0.75em;
 	}
 
-	.sentinel--action-container .setting-item:nth-child(5):has(button),
+	/* The remove button next to a command field, and the skip-existing toggle */
+	.sentinel--action-container .sentinel--action-command ~ .setting-item,
 	.sentinel--action-container .setting-item:nth-child(6) {
 		width: calc(14% - 0.5em);
 		margin-right: 0;
@@ -79,7 +80,7 @@
 	}
 
 	/* Give it more width if it is the Command field */
-	.sentinel--action-container .setting-item:nth-child(4):has(input[placeholder]) {
+	.sentinel--action-container .setting-item.sentinel--action-command {
  		width: calc(79% - 0.75em);
 	}
 }

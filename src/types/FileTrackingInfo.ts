@@ -5,6 +5,5 @@ export interface FileTrackingInfo {
 	ignoreNextModification?: boolean;
 	firstTimeOpened?: boolean;
 	hasBlurred?: boolean;
-	hasChangesTimeout?: NodeJS.Timeout;
 	lastContent?: string;
 }

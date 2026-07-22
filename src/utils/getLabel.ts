@@ -15,7 +15,7 @@ export function getLabel(labelKey: keyof Labels, replacements?: FieldString): st
 		return template;
 	}
 
-	return template.replace(/{(\w+)}/g, (match, key) => {
-		return replacements[key] || match;
+	return template.replace(/{(\w+)}/g, (match: string, key: string) => {
+		return replacements[key] ?? match;
 	});
 }

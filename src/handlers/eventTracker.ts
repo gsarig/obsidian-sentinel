@@ -14,19 +14,46 @@ export function eventTracker(
 
     if (!onFileChanged) return () => {};
 
-     const leafChangeHandler = async (leaf: WorkspaceLeaf) => {
-        // Removed the premature everOpenedFiles update
-        const newLastActiveLeaf = await handleLeafChange(
-            leaf,
-            app,
-            lastActiveLeaf,
-            openedFiles,
-            onFileChanged,
-            everOpenedFiles
-        );
-        if (newLastActiveLeaf) {
-            lastActiveLeaf = newLastActiveLeaf;
+    // Events are processed strictly in order: a single leaf transition can
+    // emit several active-leaf-change events milliseconds apart, and letting
+    // them interleave at the handler's awaits corrupts the tracking state
+    // (e.g. double-fired leave triggers).
+    // Set on cleanup so queued events cannot mutate cleared state or fire
+    // actions after the plugin has been unloaded.
+    let disposed = false;
+
+    // Final disposal gate: handleLeafChange awaits internally, so cleanup can
+    // land while one event is mid-flight; this stops its actions from firing.
+    const guardedOnFileChanged: typeof onFileChanged = (file, triggerType) => {
+        if (!disposed) {
+            onFileChanged(file, triggerType);
         }
+    };
+    let processing: Promise<void> = Promise.resolve();
+    const leafChangeHandler = (leaf: WorkspaceLeaf) => {
+        if (disposed) {
+            return;
+        }
+        processing = processing.then(async () => {
+            if (disposed) {
+                return;
+            }
+            // Always consume lastActiveLeaf, even when the new leaf holds no
+            // file: once a note's leave events have been processed it must
+            // stop being "the note we are leaving", or the next event
+            // re-fires them.
+            lastActiveLeaf = await handleLeafChange(
+                leaf,
+                app,
+                lastActiveLeaf,
+                openedFiles,
+                guardedOnFileChanged,
+                everOpenedFiles
+            );
+        }).catch((error) => {
+            // Keep the chain alive; a failed event must not stall tracking.
+            console.error('Sentinel: error while processing leaf change', error);
+        });
     };
 
     const layoutChangeHandler = () => {
@@ -52,11 +79,7 @@ export function eventTracker(
 
     // Cleanup function
     return () => {
-        openedFiles.forEach(fileInfo => {
-            if (fileInfo.hasChangesTimeout) {
-                clearTimeout(fileInfo.hasChangesTimeout);
-            }
-        });
+        disposed = true;
 
         app.workspace.off('active-leaf-change', leafChangeHandler);
         app.workspace.off('layout-change', layoutChangeHandler);
