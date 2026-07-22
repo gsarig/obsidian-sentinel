@@ -10,10 +10,12 @@ function isTagMatch(value: string, file: TFile, app: App): boolean {
         const inlineTags = fileCache?.tags?.map((t: TagCache) => t.tag.slice(1)) || [];
 
         // Check frontmatter tags
-        const frontmatterTags = fileCache?.frontmatter?.tags || [];
+        const rawFrontmatterTags: unknown = fileCache?.frontmatter?.tags;
+        const frontmatterTags = (Array.isArray(rawFrontmatterTags) ? rawFrontmatterTags : [rawFrontmatterTags])
+            .filter((t): t is string => typeof t === 'string');
 
         // Combine both tag sources and check if the tag exists in either
-        const allTags = [...inlineTags, ...(Array.isArray(frontmatterTags) ? frontmatterTags : [frontmatterTags])];
+        const allTags = [...inlineTags, ...frontmatterTags];
         return allTags.includes(tag);
 	}
 	return false;
@@ -72,7 +74,7 @@ export function shouldRunAction(where: string | undefined, file: TFile, app: App
 		}
 
 		return checkIndividualValue(where, file, app);
-	} catch (e) {
+	} catch (_e) {
 		new Notice(getLabel('invalidWhere', {
 			label: where,
 		}));

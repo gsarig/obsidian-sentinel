@@ -9,7 +9,7 @@ export async function propertyUpdater(
 	skipExisting: boolean = false
 ): Promise<boolean> {
 	try {
-		await app.fileManager.processFrontMatter(file, (frontmatter) => {
+		await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 			const currentValue = frontmatter[propertyName];
 
 			if (skipExisting && currentValue !== undefined) {
@@ -21,11 +21,14 @@ export async function propertyUpdater(
 					label: propertyName,
 				}));
 			}
-			frontmatter[propertyName] = updater(currentValue || 0);
+			const baseValue = typeof currentValue === 'number' || typeof currentValue === 'string'
+				? currentValue
+				: 0;
+			frontmatter[propertyName] = updater(baseValue || 0);
 		});
 
 		return true;
-	} catch (error) {
+	} catch (_error) {
 		new Notice(getLabel('failedUpdatingFile', {
 			label: file.path,
 		}));

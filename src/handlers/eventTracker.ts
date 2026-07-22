@@ -81,12 +81,6 @@ export function eventTracker(
     return () => {
         disposed = true;
 
-        openedFiles.forEach(fileInfo => {
-            if (fileInfo.hasChangesTimeout) {
-                clearTimeout(fileInfo.hasChangesTimeout);
-            }
-        });
-
         app.workspace.off('active-leaf-change', leafChangeHandler);
         app.workspace.off('layout-change', layoutChangeHandler);
 

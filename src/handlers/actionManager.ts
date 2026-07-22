@@ -1,15 +1,15 @@
-import {App, Notice} from 'obsidian';
+import {App, Notice, TFile} from 'obsidian';
 import {eventTracker} from './eventTracker';
 import {executeCommand} from '../actions/executeCommand';
 import {updateProperty} from '../actions/updateProperty';
 import {shouldRunAction} from '../utils/shouldRunAction';
 import {AppWithCommands} from '../types/commands';
-import {SentinelPluginSettings} from '../types/actions';
+import {Action, SentinelPluginSettings} from '../types/actions';
 import {getLabel} from '../utils/getLabel';
 
 export function actionManager(app: App, settings: SentinelPluginSettings) {
 
-	return eventTracker(app, async (file, triggerType) => {
+	const runActions = async (file: TFile, triggerType: Action['when']) => {
 		// Loop through all actions in settings
 		const matchingActions = settings.actions.filter(action => action.when === triggerType);
 
@@ -27,7 +27,7 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 						action.propertyValue,
 						action.skipExisting || false
 					);
-				} catch (error) {
+				} catch (_error) {
 					new Notice(getLabel('failedUpdatingProperty', {
 						label: action.propertyName,
 					}));
@@ -35,12 +35,18 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 			} else if (action.what === 'command' && action.commandId) {
 				try {
 					executeCommand(app as AppWithCommands, action.commandId);
-				} catch (error) {
+				} catch (_error) {
 					new Notice(getLabel('failedExecutingCommand', {
 						label: action.commandId,
 					}));
 				}
 			}
 		}
+	};
+
+	return eventTracker(app, (file, triggerType) => {
+		// Fire and forget: the tracker expects a synchronous callback, and the
+		// async action runner handles its own errors per action.
+		void runActions(file, triggerType);
 	});
 }

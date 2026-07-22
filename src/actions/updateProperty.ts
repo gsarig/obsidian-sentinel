@@ -35,7 +35,7 @@ export async function updateProperty(
 		try {
 			await incrementProperty(file, app, propertyName, initialValue, step);
 			return true;
-		} catch (error) {
+		} catch (_error) {
 			return false;
 		}
 	}
@@ -48,7 +48,7 @@ export async function updateProperty(
 	try {
 		await propertyUpdater(file, app, propertyName, () => parsedTemplate, skipExisting);
 		return true;
-	} catch (error) {
+	} catch (_error) {
 		return false;
 	}
 }

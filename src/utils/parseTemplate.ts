@@ -1,4 +1,5 @@
 import {Notice, moment} from 'obsidian';
+import type {unitOfTime} from 'moment';
 import {getLabel} from './getLabel';
 
 /**
@@ -14,7 +15,7 @@ export function parseTemplate(template: string, title: string = ""): string {
     return template.replace(/{{[^{}]*}}/g, (placeholder) => {
         // Handle {{date}} and its variants
         if (/^{{\s*date(?::([^}]+))?\s*}}$/.test(placeholder)) {
-            return placeholder.replace(/{{\s*date(?::([^}]+))?\s*}}/, (_, format) => {
+            return placeholder.replace(/{{\s*date(?::([^}]+))?\s*}}/, (_: string, format?: string) => {
                 if (!format || format.trim() === "today") {
                     // Default to today's date
                     return moment().format("YYYY-MM-DD");
@@ -24,14 +25,14 @@ export function parseTemplate(template: string, title: string = ""): string {
                 const matchRelative = format.match(/^([+-]\d+)([dMyw])$/); // e.g., +7d, -1M
                 if (matchRelative) {
                     const amount = parseInt(matchRelative[1], 10);
-                    const unit = matchRelative[2]; // d=days, M=months, y=years, w=weeks
+                    const unit = matchRelative[2] as unitOfTime.DurationConstructor; // d=days, M=months, y=years, w=weeks
                     return moment().add(amount, unit).format("YYYY-MM-DD");
                 }
 
                 // Handle specific moment.js formats, e.g., {{date:YYYY-MM-DD}}
                 try {
                     return moment().format(format);
-                } catch (err) {
+                } catch (_err) {
                     new Notice(getLabel('invalidDateFormat', {
                         label: format,
                     }));
@@ -42,7 +43,7 @@ export function parseTemplate(template: string, title: string = ""): string {
 
         // Handle {{time}} and its variants
         if (/^{{\s*time(?::([^}]+))?\s*}}$/.test(placeholder)) {
-            return placeholder.replace(/{{\s*time(?::([^}]+))?\s*}}/, (_, format) => {
+            return placeholder.replace(/{{\s*time(?::([^}]+))?\s*}}/, (_: string, format?: string) => {
                 if (!format) {
                     // Default to the current time
                     return moment().format("HH:mm");
@@ -51,7 +52,7 @@ export function parseTemplate(template: string, title: string = ""): string {
                 // Handle specific moment.js formats, e.g., {{time:HH:mm:ss}}
                 try {
                     return moment().format(format);
-                } catch (err) {
+                } catch (_err) {
                     new Notice(getLabel('invalidTimeFormat', {
                         label: format,
                     }));
