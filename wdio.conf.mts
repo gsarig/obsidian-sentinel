@@ -22,7 +22,9 @@ export const config: WebdriverIO.Config = {
 
 	specs: ["./test/specs/**/*.e2e.ts"],
 
-	maxInstances: Number(env.WDIO_MAX_INSTANCES || 1),
+	// 10 parallel Obsidian instances by default locally (measured flake-free,
+	// ~8x faster than sequential); CI pins its own value via the env var.
+	maxInstances: Number(env.WDIO_MAX_INSTANCES || 10),
 
 	capabilities: desktopVersions.map<WebdriverIO.Capabilities>(([appVersion, installerVersion]) => ({
 		browserName: "obsidian",
