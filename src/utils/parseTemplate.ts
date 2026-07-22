@@ -1,6 +1,5 @@
-import {Notice, moment} from 'obsidian';
+import {moment} from 'obsidian';
 import type {unitOfTime} from 'moment';
-import {getLabel} from './getLabel';
 
 /**
  * Parses a template string containing placeholders like {{date}}, {{time}}, or {{title}}.
@@ -29,15 +28,10 @@ export function parseTemplate(template: string, title: string = ""): string {
                     return moment().add(amount, unit).format("YYYY-MM-DD");
                 }
 
-                // Handle specific moment.js formats, e.g., {{date:YYYY-MM-DD}}
-                try {
-                    return moment().format(format);
-                } catch (_err) {
-                    new Notice(getLabel('invalidDateFormat', {
-                        label: format,
-                    }));
-                    return placeholder;
-                }
+                // Handle specific moment.js formats, e.g., {{date:YYYY-MM-DD}}.
+                // moment().format() never throws; unknown tokens come back as
+                // literals, so there is no error path to handle here.
+                return moment().format(format);
             });
         }
 
@@ -49,15 +43,9 @@ export function parseTemplate(template: string, title: string = ""): string {
                     return moment().format("HH:mm");
                 }
 
-                // Handle specific moment.js formats, e.g., {{time:HH:mm:ss}}
-                try {
-                    return moment().format(format);
-                } catch (_err) {
-                    new Notice(getLabel('invalidTimeFormat', {
-                        label: format,
-                    }));
-                    return placeholder;
-                }
+                // Handle specific moment.js formats, e.g., {{time:HH:mm:ss}}.
+                // Same as {{date}}: moment().format() never throws.
+                return moment().format(format);
             });
         }
 
