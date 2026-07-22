@@ -28,6 +28,11 @@ describe('shouldRunAction', () => {
 			expect(shouldRunAction('#tag-1', makeFile('N.md'), app)).toBe(true);
 		});
 
+		it('matches a frontmatter tag written with a leading #', () => {
+			const app = makeApp({ frontmatter: { tags: ['#tag-1'] } });
+			expect(shouldRunAction('#tag-1', makeFile('N.md'), app)).toBe(true);
+		});
+
 		it('does not match an absent tag', () => {
 			const app = makeApp({ frontmatter: { tags: ['other'] } });
 			expect(shouldRunAction('#tag-1', makeFile('N.md'), app)).toBe(false);

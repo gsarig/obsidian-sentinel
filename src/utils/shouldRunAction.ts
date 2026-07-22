@@ -9,10 +9,12 @@ function isTagMatch(value: string, file: TFile, app: App): boolean {
 		// Check inline tags
         const inlineTags = fileCache?.tags?.map((t: TagCache) => t.tag.slice(1)) || [];
 
-        // Check frontmatter tags
+        // Check frontmatter tags, normalizing an optional leading # so they
+        // match the same way inline tags do.
         const rawFrontmatterTags: unknown = fileCache?.frontmatter?.tags;
         const frontmatterTags = (Array.isArray(rawFrontmatterTags) ? rawFrontmatterTags : [rawFrontmatterTags])
-            .filter((t): t is string => typeof t === 'string');
+            .filter((t): t is string => typeof t === 'string')
+            .map((t) => (t.startsWith('#') ? t.slice(1) : t));
 
         // Combine both tag sources and check if the tag exists in either
         const allTags = [...inlineTags, ...frontmatterTags];
