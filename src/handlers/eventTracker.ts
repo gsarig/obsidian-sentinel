@@ -45,10 +45,37 @@ export function eventTracker(
             }
         }
     };
+    const renameHandler = (file: unknown, oldPath: string) => {
+        if (!(file instanceof TFile)) {
+            return;
+        }
+
+        const newPath = file.path;
+        if (newPath === oldPath) {
+            return;
+        }
+
+        if (lastActiveLeaf && lastActiveLeaf.path === oldPath) {
+            lastActiveLeaf.path = newPath;
+        }
+
+        const fileInfo = openedFiles.get(oldPath);
+        if (fileInfo) {
+            fileInfo.path = newPath;
+            openedFiles.delete(oldPath);
+            openedFiles.set(newPath, fileInfo);
+        }
+
+        if (everOpenedFiles.has(oldPath)) {
+            everOpenedFiles.delete(oldPath);
+            everOpenedFiles.add(newPath);
+        }
+    };
 
     // Register event listeners
     app.workspace.on('active-leaf-change', leafChangeHandler);
     app.workspace.on('layout-change', layoutChangeHandler);
+    app.vault.on('rename', renameHandler);
 
     // Cleanup function
     return () => {
