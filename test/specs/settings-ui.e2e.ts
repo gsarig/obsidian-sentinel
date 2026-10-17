@@ -41,6 +41,8 @@ describe("Settings UI", function () {
 	});
 
 	it("creates an action through the settings form, persists it, and it fires", async function () {
+		const mainWindow = await browser.getWindowHandle();
+		const handlesBefore = await browser.getWindowHandles();
 		await browser.executeObsidian(({ app }) => {
 			const setting = (app as unknown as {
 				setting: { open: () => void; openTabById: (id: string) => void };
@@ -48,6 +50,16 @@ describe("Settings UI", function () {
 			setting.open();
 			setting.openTabById("sentinel");
 		});
+
+		// Obsidian 1.14+ opens settings in a separate popout window by default
+		// (the `settingsPopoutWindow` vault config), and WebDriver only sees
+		// the DOM of the window it is attached to. Older versions render
+		// settings as a modal in the main window, so no switch is needed there.
+		const handlesAfter = await browser.getWindowHandles();
+		const settingsWindow = handlesAfter.find((h) => !handlesBefore.includes(h));
+		if (settingsWindow) {
+			await browser.switchToWindow(settingsWindow);
+		}
 
 		const addButton = await $("button=Add action");
 		await addButton.waitForDisplayed({ timeout: 5000 });
@@ -68,6 +80,9 @@ describe("Settings UI", function () {
 		const valueInput = await settingControl(container, "Value");
 		await valueInput.setValue("fromUI");
 
+		// Back to the main window before closing settings: the popout (if
+		// any) goes away on close, and the remaining steps act on the vault.
+		await browser.switchToWindow(mainWindow);
 		await browser.executeObsidian(({ app }) => {
 			(app as unknown as { setting: { close: () => void } }).setting.close();
 		});

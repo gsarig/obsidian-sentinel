@@ -1,4 +1,4 @@
-import {App, TFile, WorkspaceLeaf, MarkdownView} from 'obsidian';
+import {App, TAbstractFile, TFile, WorkspaceLeaf, MarkdownView} from 'obsidian';
 import {FileTrackingInfo} from '../types/FileTrackingInfo';
 import {handleLeafChange} from './leafChangeHandler';
 import {Action} from "../types/actions";
@@ -65,17 +65,62 @@ export function eventTracker(
                 .filter((path): path is string => path !== null)
         );
 
-        // Remove tracking for files that are no longer open
         for (const [path] of openedFiles) {
-            if (!currentPaths.has(path)) {
-                openedFiles.delete(path);
+            // The note being left is handled by the next active-leaf-change,
+            // which closing the active tab always emits; acting here too
+            // would fire its close twice.
+            if (currentPaths.has(path) || path === lastActiveLeaf?.path) {
+                continue;
             }
+            openedFiles.delete(path);
+            // A background tab was closed: no active-leaf-change follows,
+            // so this is the only place its close can be seen.
+            const file = app.vault.getAbstractFileByPath(path);
+            if (file instanceof TFile) {
+                guardedOnFileChanged(file, 'everyClose');
+            }
+        }
+    };
+
+    // Tracking is keyed by path, so a rename (of the note or a parent folder)
+    // must move it along, or the note's leave and close events are lost.
+    const renameHandler = (file: TAbstractFile, oldPath: string) => {
+        const rebase = (path: string): string | null => {
+            if (path === oldPath) {
+                return file.path;
+            }
+            if (path.startsWith(oldPath + '/')) {
+                return file.path + path.slice(oldPath.length);
+            }
+            return null;
+        };
+
+        for (const [path, info] of [...openedFiles]) {
+            const newPath = rebase(path);
+            if (newPath !== null) {
+                openedFiles.delete(path);
+                info.path = newPath;
+                openedFiles.set(newPath, info);
+            }
+        }
+        for (const path of [...everOpenedFiles]) {
+            const newPath = rebase(path);
+            if (newPath !== null) {
+                everOpenedFiles.delete(path);
+                everOpenedFiles.add(newPath);
+            }
+        }
+        // Usually the same object as its openedFiles entry, but not always.
+        const newActivePath = lastActiveLeaf ? rebase(lastActiveLeaf.path) : null;
+        if (lastActiveLeaf && newActivePath !== null) {
+            lastActiveLeaf.path = newActivePath;
         }
     };
 
     // Register event listeners
     app.workspace.on('active-leaf-change', leafChangeHandler);
     app.workspace.on('layout-change', layoutChangeHandler);
+    app.vault.on('rename', renameHandler);
 
     // Cleanup function
     return () => {
@@ -83,6 +128,7 @@ export function eventTracker(
 
         app.workspace.off('active-leaf-change', leafChangeHandler);
         app.workspace.off('layout-change', layoutChangeHandler);
+        app.vault.off('rename', renameHandler);
 
         openedFiles.clear();
         everOpenedFiles.clear();
