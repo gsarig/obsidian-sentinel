@@ -8,20 +8,24 @@ import '../styles.css';
 export default class Sentinel extends Plugin {
 
 	settings: SentinelPluginSettings;
+	private stopActionManager?: () => void;
 
 	async onload() {
 
 		// Register the settings tab.
 		this.settings = Object.assign({}, DEFAULT_SETTINGS);
-		await this.loadData().then((data) => {
-			if (data) {
-				this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
-			}
-		});
+		const data = (await this.loadData()) as Partial<SentinelPluginSettings> | null;
+		if (data) {
+			this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+		}
 		this.addSettingTab(new SentinelSettings(this.app, this));
 
 		// Handle the actions.
-		actionManager(this.app, this.settings);
+		this.stopActionManager = actionManager(this.app, this.settings);
+	}
+
+	onunload() {
+		this.stopActionManager?.();
 	}
 
 	async saveSettings() {

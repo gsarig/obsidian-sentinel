@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+      - name: Run unit tests
+        run: npm test
+
+      # Get the key to use for the .obsidian-cache GitHub cache. Run wdio.conf.mts
+      # directly, which logs the resolved Obsidian versions to test (see the
+      # `if (env.CI)` block in wdio.conf.mts). We use that output as the cache key.
+      - name: "Get Obsidian cache key"
+        # Must resolve the same version set as the e2e step below, or the
+        # cache key drifts from the cache contents.
+        env:
+          OBSIDIAN_VERSIONS: "earliest/earliest latest/latest"
+        run: |
+          set -o pipefail
+          npx tsx wdio.conf.mts | grep 'obsidian-cache-key:' > obsidian-versions-lock.txt
+          # Delete the cache created by wdio.conf.mts so it doesn't conflict with restore
+          rm -rf .obsidian-cache
+
+      - name: Cache Obsidian
+        uses: actions/cache@v4
+        with:
+          path: .obsidian-cache
+          key: obsidian-cache-${{ hashFiles('obsidian-versions-lock.txt') }}
+
+      # Set up a virtual graphics stack for Obsidian: xvfb as a virtual display
+      # server and herbstluftwm as the window manager (some Obsidian features
+      # don't work properly without a window manager).
+      - name: "Setup virtual graphics"
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -q -y xvfb herbstluftwm dzen2 x11-xserver-utils
+
+          export DISPLAY=:99
+          echo "DISPLAY=$DISPLAY" >> "$GITHUB_ENV"
+          Xvfb $DISPLAY -screen 0 1280x1024x24 +extension GLX -noreset &
+          sleep 1
+          herbstluftwm &
+          sleep 1
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          OBSIDIAN_VERSIONS: "earliest/earliest latest/latest"
+          WDIO_MAX_INSTANCES: 2
+          OBSIDIAN_E2E_SETTLE: 1000

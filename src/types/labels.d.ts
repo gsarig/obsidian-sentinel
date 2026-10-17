@@ -1,4 +1,5 @@
 export type Labels = {
+	actionsHeading: string;
 	errorModifyFile: string;
 	errorReadingFile: string;
 	errorProcessingFile: string;

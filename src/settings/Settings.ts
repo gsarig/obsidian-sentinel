@@ -1,6 +1,7 @@
 import {App, Plugin, PluginSettingTab, Setting} from 'obsidian';
 import {addAction} from './settingsActions';
 import {SentinelPlugin} from './settingsConfig';
+import {getLabel} from '../utils/getLabel';
 
 export class SentinelSettings extends PluginSettingTab {
 	plugin: Plugin & SentinelPlugin;
@@ -14,11 +15,11 @@ export class SentinelSettings extends PluginSettingTab {
 		const {containerEl} = this;
 		containerEl.empty();
 
-		containerEl.createEl('h3', {text: 'Actions'});
+		new Setting(containerEl).setName(getLabel('actionsHeading')).setHeading();
 
 		if (this.plugin.settings.actions) {
 			this.plugin.settings.actions.forEach((action, index) => {
-				addAction(containerEl, action, index, this.plugin, this.display.bind(this));
+				addAction(containerEl, action, index, this.plugin, () => this.display());
 			});
 		}
 
