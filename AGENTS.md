@@ -6,7 +6,7 @@ Instructions for any AI agent working on this repository. Sentinel is an Obsidia
 
 - **Language:** TypeScript, bundled to `main.js` with esbuild.
 - **Entry point:** `src/main.ts` (the `Sentinel` plugin class). Compiled to `main.js` at the plugin root and loaded by Obsidian.
-- **Release artifacts:** `main.js`, `manifest.json`, `styles.css`. Never commit `main.js` (it is gitignored and attached to GitHub releases instead).
+- **Release artifacts:** `main.js`, `manifest.json`. Never commit `main.js` (it is gitignored and attached to GitHub releases instead).
 - **Mobile:** `isDesktopOnly` is `false`. Avoid Node and Electron APIs so the plugin keeps working on mobile.
 
 ## Architecture
