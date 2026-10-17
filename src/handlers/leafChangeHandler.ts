@@ -30,13 +30,16 @@ export async function handleLeafChange(
             const isFileStillOpen = app.workspace.getLeavesOfType('markdown')
                 .some(leaf => (leaf.view as FileView).file?.path === previousFile.path);
 
+			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
+
             if (!isFileStillOpen) {
-				// File is actually closed, not just switched
+				// File is actually closed, not just switched. Drop its
+				// tracking here so layout-change does not fire the close again.
+				openedFiles.delete(lastActiveLeaf.path);
 				onFileChanged(previousFile, 'everyClose');
 			}
 
 			onFileChanged(previousFile, 'everyLeave');
-			const previousFileInfo = openedFiles.get(lastActiveLeaf.path);
 
 
 			// Detect if the previous file has been modified

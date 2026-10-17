@@ -65,10 +65,19 @@ export function eventTracker(
                 .filter((path): path is string => path !== null)
         );
 
-        // Remove tracking for files that are no longer open
         for (const [path] of openedFiles) {
-            if (!currentPaths.has(path)) {
-                openedFiles.delete(path);
+            // The note being left is handled by the next active-leaf-change,
+            // which closing the active tab always emits; acting here too
+            // would fire its close twice.
+            if (currentPaths.has(path) || path === lastActiveLeaf?.path) {
+                continue;
+            }
+            openedFiles.delete(path);
+            // A background tab was closed: no active-leaf-change follows,
+            // so this is the only place its close can be seen.
+            const file = app.vault.getAbstractFileByPath(path);
+            if (file instanceof TFile) {
+                guardedOnFileChanged(file, 'everyClose');
             }
         }
     };
