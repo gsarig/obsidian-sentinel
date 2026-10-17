@@ -135,6 +135,20 @@ export async function focusNote(path: string): Promise<void> {
 	);
 }
 
+// Rename a note the way the UI does (fileManager also updates links).
+export async function renameNote(from: string, to: string): Promise<void> {
+	await browser.executeObsidian(
+		async ({ app }, from, to) => {
+			const file = app.vault.getAbstractFileByPath(from);
+			if (file) {
+				await app.fileManager.renameFile(file, to);
+			}
+		},
+		from,
+		to,
+	);
+}
+
 // Close every leaf currently showing the given note (fires a real close).
 export async function closeNote(path: string): Promise<void> {
 	await browser.executeObsidian(

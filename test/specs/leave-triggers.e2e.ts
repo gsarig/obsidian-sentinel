@@ -1,7 +1,7 @@
 import { browser, expect } from "@wdio/globals";
 import { describe, it, beforeEach } from "mocha";
 import { obsidianPage } from "wdio-obsidian-service";
-import { setActions, createNote, openNote, openNoteInNewTab, focusNote, editNote, frontmatterOf, waitForProperty } from "./helpers.js";
+import { setActions, createNote, openNote, openNoteInNewTab, focusNote, editNote, renameNote, closeNote, frontmatterOf, waitForProperty } from "./helpers.js";
 
 // Give the plugin a beat to store the note's opened content before we edit it,
 // so leave-with-changes detection compares against the original.
@@ -156,5 +156,33 @@ describe("Leave triggers", function () {
 		await openNote("B.md");
 		await waitForProperty("A.md", "changed", "yes"); // control fired
 		expect((await frontmatterOf("A.md"))?.bodyChanged).toBe(undefined);
+	});
+
+	// Regression for #18 ("trigger doesn't fire after a rename"): tracking
+	// kept the note's old path, so leaving the renamed note looked up a file
+	// that no longer existed and fired nothing.
+	it("leave triggers fire for a note renamed while open", async function () {
+		await setActions([
+			{ when: "everyLeave", what: "property", propertyName: "left", propertyValue: "{{increment}}" },
+			{ when: "everyClose", what: "property", propertyName: "closed", propertyValue: "{{increment}}" },
+		]);
+		await createNote("A.md", "# A\n");
+		await createNote("B.md", "# B\n");
+
+		await openNote("A.md");
+		await browser.pause(SETTLE);
+		await renameNote("A.md", "Renamed.md");
+		await browser.pause(SETTLE);
+
+		await openNoteInNewTab("B.md");
+		await waitForProperty("Renamed.md", "left", 1);
+
+		// Closing it must be detected under the new path too.
+		await closeNote("Renamed.md");
+		await waitForProperty("Renamed.md", "closed", 1);
+		await browser.pause(SETTLE);
+
+		expect((await frontmatterOf("Renamed.md"))?.left).toBe(1);
+		expect((await frontmatterOf("Renamed.md"))?.closed).toBe(1);
 	});
 });
