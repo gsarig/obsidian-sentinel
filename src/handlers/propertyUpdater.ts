@@ -29,7 +29,7 @@ export async function propertyUpdater(
 		});
 
 		return true;
-	} catch (_error) {
+	} catch {
 		new Notice(getLabel('failedUpdatingFile', {
 			label: file.path,
 		}));

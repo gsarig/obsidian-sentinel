@@ -45,7 +45,7 @@ export async function incrementProperty(
 			incrementedValue = numericValue + step;
 			return incrementedValue;
 		});
-	} catch (_error) {
+	} catch {
 		new Notice(getLabel('errorIncrementingPropery', {
 			label: propertyName,
 		}));

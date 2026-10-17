@@ -76,7 +76,7 @@ export function shouldRunAction(where: string | undefined, file: TFile, app: App
 		}
 
 		return checkIndividualValue(where, file, app);
-	} catch (_e) {
+	} catch {
 		new Notice(getLabel('invalidWhere', {
 			label: where,
 		}));

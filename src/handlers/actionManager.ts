@@ -27,7 +27,7 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 						action.propertyValue,
 						action.skipExisting || false
 					);
-				} catch (_error) {
+				} catch {
 					new Notice(getLabel('failedUpdatingProperty', {
 						label: action.propertyName,
 					}));
@@ -35,7 +35,7 @@ export function actionManager(app: App, settings: SentinelPluginSettings) {
 			} else if (action.what === 'command' && action.commandId) {
 				try {
 					executeCommand(app as AppWithCommands, action.commandId);
-				} catch (_error) {
+				} catch {
 					new Notice(getLabel('failedExecutingCommand', {
 						label: action.commandId,
 					}));
