@@ -17,13 +17,74 @@ async function settingControl(container: WebdriverIO.Element, name: string): Pro
 	);
 }
 
+// Find a clickable action row (e.g. "Add action", "Remove action") by its name.
+async function actionRow(scope: WebdriverIO.Browser | WebdriverIO.Element, name: string): Promise<WebdriverIO.Element> {
+	return scope.$(
+		`.//div[${hasClass("setting-item")}][${hasClass("mod-action")}][.//div[${hasClass("setting-item-name")}][normalize-space()="${name}"]]`,
+	);
+}
+
+async function actionContainers(): Promise<WebdriverIO.Element[]> {
+	return Array.from(await $$(".sentinel--action-container"));
+}
+
+// Open Sentinel's settings tab and attach WebDriver to it. Obsidian 1.14+
+// opens settings in a separate popout window by default (the
+// `settingsPopoutWindow` vault config), and WebDriver only sees the DOM of
+// the window it is attached to; older versions render a modal in the main
+// window.
+async function openSettings(): Promise<void> {
+	const handlesBefore = await browser.getWindowHandles();
+	await browser.executeObsidian(({ app }) => {
+		const setting = (app as unknown as {
+			setting: { open: () => void; openTabById: (id: string) => void };
+		}).setting;
+		setting.open();
+		setting.openTabById("sentinel");
+	});
+	const settingsWindow = (await browser.getWindowHandles()).find((h) => !handlesBefore.includes(h));
+	if (settingsWindow) {
+		await browser.switchToWindow(settingsWindow);
+	}
+}
+
+// Back to the main window before closing settings: the popout (if any) goes
+// away on close, and later steps act on the vault.
+async function closeSettings(mainWindow: string): Promise<void> {
+	await browser.switchToWindow(mainWindow);
+	await browser.executeObsidian(({ app }) => {
+		(app as unknown as { setting: { close: () => void } }).setting.close();
+	});
+}
+
+// The plugin's persisted data.json, as opposed to its in-memory settings.
+async function savedActions(): Promise<Array<Record<string, unknown>>> {
+	const saved = await browser.executeObsidian(({ app }) => {
+		const plugin = (app as unknown as {
+			plugins: {
+				plugins: Record<string, {
+					loadData: () => Promise<{ actions: Array<Record<string, unknown>> }>;
+				}>;
+			};
+		}).plugins.plugins["sentinel"];
+		return plugin.loadData();
+	});
+	return saved.actions;
+}
+
 describe("Settings UI", function () {
+	let mainWindow: string;
+
 	beforeEach(async function () {
+		mainWindow = await browser.getWindowHandle();
 		await obsidianPage.resetVault("test/vaults/simple");
 		await setActions([]);
 	});
 
 	afterEach(async function () {
+		// A failed test can leave WebDriver attached to the settings popout,
+		// where the Obsidian helpers below are not available.
+		await browser.switchToWindow(mainWindow);
 		// This spec (uniquely) writes through the real settings UI to
 		// data.json, so a plain in-memory reset is not enough cleanup.
 		await browser.executeObsidian(({ app }) => {
@@ -41,35 +102,17 @@ describe("Settings UI", function () {
 	});
 
 	it("creates an action through the settings form, persists it, and it fires", async function () {
-		const mainWindow = await browser.getWindowHandle();
-		const handlesBefore = await browser.getWindowHandles();
-		await browser.executeObsidian(({ app }) => {
-			const setting = (app as unknown as {
-				setting: { open: () => void; openTabById: (id: string) => void };
-			}).setting;
-			setting.open();
-			setting.openTabById("sentinel");
-		});
+		await openSettings();
 
-		// Obsidian 1.14+ opens settings in a separate popout window by default
-		// (the `settingsPopoutWindow` vault config), and WebDriver only sees
-		// the DOM of the window it is attached to. Older versions render
-		// settings as a modal in the main window, so no switch is needed there.
-		const handlesAfter = await browser.getWindowHandles();
-		const settingsWindow = handlesAfter.find((h) => !handlesBefore.includes(h));
-		if (settingsWindow) {
-			await browser.switchToWindow(settingsWindow);
-		}
+		const addRow = await actionRow(browser, "Add action");
+		await addRow.waitForDisplayed({ timeout: 5000 });
+		await addRow.click();
 
-		const addButton = await $("button=Add action");
-		await addButton.waitForDisplayed({ timeout: 5000 });
-		await addButton.click();
-
-		await browser.waitUntil(async () => (await $$(".sentinel--action-container")).length === 1, {
+		await browser.waitUntil(async () => (await actionContainers()).length === 1, {
 			timeout: 5000,
-			timeoutMsg: "new action container never appeared",
+			timeoutMsg: "new action group never appeared",
 		});
-		const container = (await $$(".sentinel--action-container"))[0];
+		const container = (await actionContainers())[0];
 
 		const whenSelect = await settingControl(container, "When");
 		await whenSelect.selectByAttribute("value", "everyOpen");
@@ -80,34 +123,62 @@ describe("Settings UI", function () {
 		const valueInput = await settingControl(container, "Value");
 		await valueInput.setValue("fromUI");
 
-		// Back to the main window before closing settings: the popout (if
-		// any) goes away on close, and the remaining steps act on the vault.
-		await browser.switchToWindow(mainWindow);
-		await browser.executeObsidian(({ app }) => {
-			(app as unknown as { setting: { close: () => void } }).setting.close();
-		});
+		await closeSettings(mainWindow);
 
 		// Persistence: proves data.json was actually written, not just an
 		// in-memory settings object (the other specs seed actions directly
 		// in memory via setActions(), which bypasses saveSettings/data.json).
-		const saved = await browser.executeObsidian(({ app }) => {
-			const plugin = (app as unknown as {
-				plugins: {
-					plugins: Record<string, {
-						loadData: () => Promise<{ actions: Array<Record<string, unknown>> }>;
-					}>;
-				};
-			}).plugins.plugins["sentinel"];
-			return plugin.loadData();
-		});
-		expect(
-			saved.actions.some(
+		await browser.waitUntil(
+			async () => (await savedActions()).some(
 				(a) => a.propertyName === "uiProp" && a.propertyValue === "fromUI" && a.when === "everyOpen",
 			),
-		).toBe(true);
+			{ timeout: 5000, timeoutMsg: "the new action was never saved to data.json" },
+		);
 
 		await createNote("UI.md", "# UI\n");
 		await openNote("UI.md");
 		await waitForProperty("UI.md", "uiProp", "fromUI");
+	});
+
+	it("swaps the fields when What changes, and removes an action", async function () {
+		await setActions([
+			{ where: "", when: "everyOpen", what: "property", propertyName: "stale", propertyValue: "x" },
+		]);
+		await openSettings();
+
+		await browser.waitUntil(async () => (await actionContainers()).length === 1, {
+			timeout: 5000,
+			timeoutMsg: "seeded action group never appeared",
+		});
+		const whatSelect = await settingControl((await actionContainers())[0], "What");
+		await whatSelect.selectByAttribute("value", "command");
+
+		// The group is rebuilt: the Command field replaces the property fields.
+		await browser.waitUntil(
+			async () => (await (await settingControl((await actionContainers())[0], "Command")).isExisting())
+				&& !(await (await settingControl((await actionContainers())[0], "Property name")).isExisting()),
+			{ timeout: 5000, timeoutMsg: "fields did not swap to the command layout" },
+		);
+		await closeSettings(mainWindow);
+
+		// A stale property must never run once the action became a command.
+		await browser.waitUntil(
+			async () => {
+				const [action] = await savedActions();
+				return action?.what === "command" && action.propertyName === undefined && action.propertyValue === undefined;
+			},
+			{ timeout: 5000, timeoutMsg: "switching to a command did not clear the property fields" },
+		);
+
+		await openSettings();
+		const removeRow = await actionRow((await actionContainers())[0], "Remove action");
+		await removeRow.waitForDisplayed({ timeout: 5000 });
+		await removeRow.click();
+		await browser.waitUntil(async () => (await actionContainers()).length === 0, {
+			timeout: 5000,
+			timeoutMsg: "removed action group is still shown",
+		});
+		await closeSettings(mainWindow);
+		expect(await savedActions()).toEqual([]);
 	});
 });
