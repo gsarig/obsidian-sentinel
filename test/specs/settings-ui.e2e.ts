@@ -97,8 +97,9 @@ describe("Settings UI", function () {
 
 	afterEach(async function () {
 		// A failed test can leave WebDriver attached to the settings popout,
-		// where the Obsidian helpers below are not available.
-		await browser.switchToWindow(mainWindow);
+		// where the Obsidian helpers below are not available, and leave the
+		// popout open, so the next openSettings() would find no new window.
+		await closeSettings(mainWindow);
 		// This spec (uniquely) writes through the real settings UI to
 		// data.json, so a plain in-memory reset is not enough cleanup.
 		await browser.executeObsidian(({ app }) => {
