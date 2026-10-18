@@ -3,7 +3,6 @@ import {DEFAULT_SETTINGS} from './settings/settingsConfig';
 import {SentinelPluginSettings} from './types/actions';
 import {SentinelSettings} from './settings/Settings';
 import {actionManager} from './handlers/actionManager';
-import '../styles.css';
 
 export default class Sentinel extends Plugin {
 

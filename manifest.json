@@ -2,7 +2,7 @@
 	"id": "sentinel",
 	"name": "Sentinel",
 	"version": "1.2.1",
-	"minAppVersion": "1.7.7",
+	"minAppVersion": "1.13.4",
 	"description": "Trigger actions based on document visibility changes.",
 	"author": "Giorgos Sarigiannidis",
 	"authorUrl": "https://github.com/gsarig",

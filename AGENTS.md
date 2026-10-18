@@ -6,7 +6,7 @@ Instructions for any AI agent working on this repository. Sentinel is an Obsidia
 
 - **Language:** TypeScript, bundled to `main.js` with esbuild.
 - **Entry point:** `src/main.ts` (the `Sentinel` plugin class). Compiled to `main.js` at the plugin root and loaded by Obsidian.
-- **Release artifacts:** `main.js`, `manifest.json`, `styles.css`. Never commit `main.js` (it is gitignored and attached to GitHub releases instead).
+- **Release artifacts:** `main.js`, `manifest.json`. Never commit `main.js` (it is gitignored and attached to GitHub releases instead).
 - **Mobile:** `isDesktopOnly` is `false`. Avoid Node and Electron APIs so the plugin keeps working on mobile.
 
 ## Architecture
@@ -50,7 +50,9 @@ npm run test:e2e  # run the wdio end-to-end suite (drives a real Obsidian)
 Two layers. Run both before pushing.
 
 1. **Unit tests (`npm test`, Vitest).** Cover the pure logic where regressions actually happen: targeting rules, template parsing, frontmatter stripping, label substitution. The `obsidian` module is aliased to `test/mocks/obsidian.ts` (a `Notice` stub plus real `moment`), so tests run without Obsidian. When you change targeting or template behaviour, add or update a test in the same commit.
-2. **E2E tests (`npm run test:e2e`, wdio-obsidian-service).** Drive a real sandboxed Obsidian against the fixture vault in `test/vaults/simple/`: every trigger type, targeting modes, actions, the settings UI, and regression tests. Rebuild (`npm run build`) first when `src/` changed, since the suite loads the bundled `main.js`.
+2. **E2E tests (`npm run test:e2e`, wdio-obsidian-service).** Drive a real sandboxed Obsidian against the fixture vault in `test/vaults/simple/`: every trigger type, targeting modes, actions, the settings UI, and regression tests. The suite runs on the `minAppVersion` Obsidian, the latest one, and the latest in mobile emulation (phone layout); `OBSIDIAN_VERSIONS` picks the versions. Rebuild (`npm run build`) first when `src/` changed, since the suite loads the bundled `main.js`.
+
+When you add or change an e2e test, run it several times locally on every setup before calling it passing. CI retries a failed test twice, which hides flakiness; local runs do not retry. A single green run is not evidence: the settings spec once passed that way while failing intermittently in mobile emulation.
 
 For manual checks beyond the suites, build into a dev vault, reload Obsidian, and exercise the affected triggers directly.
 

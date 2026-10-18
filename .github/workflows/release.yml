@@ -36,7 +36,6 @@ jobs:
             main.js
             manifest.json
             manifest-beta.json
-            styles.css
 
       - name: Create release
         env:
@@ -49,10 +48,10 @@ jobs:
                 --title="$tag" \
                 --draft \
                 --prerelease \
-                main.js manifest-beta.json styles.css
+                main.js manifest-beta.json
             else
               gh release create "$tag" \
                 --title="$tag" \
                 --draft \
-                main.js manifest.json styles.css
+                main.js manifest.json
             fi
