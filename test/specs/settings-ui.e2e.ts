@@ -1,7 +1,7 @@
 import { $, $$, browser, expect } from "@wdio/globals";
 import { describe, it, beforeEach, afterEach } from "mocha";
 import { obsidianPage } from "wdio-obsidian-service";
-import { setActions, createNote, openNote, waitForProperty } from "./helpers.js";
+import { setActions, createNote, openNote, waitForProperty, type SentinelAction } from "./helpers.js";
 
 // Match a setting-item's exact class token, not a substring (e.g. avoid
 // "setting-item-name" matching a "setting-item" lookup).
@@ -72,13 +72,27 @@ async function savedActions(): Promise<Array<Record<string, unknown>>> {
 	return saved.actions;
 }
 
+// Seed actions in memory and refresh the settings tab's definitions. Once the
+// tab has called update() (adding or removing an action does), it renders
+// from those stored definitions, so in-memory changes made behind its back
+// stay invisible until the next update().
+async function seedActions(actions: SentinelAction[]): Promise<void> {
+	await setActions(actions);
+	await browser.executeObsidian(({ app }) => {
+		const tabs = (app as unknown as {
+			setting: { pluginTabs: Array<{ id: string; update: () => void }> };
+		}).setting.pluginTabs;
+		tabs.find((tab) => tab.id === "sentinel")?.update();
+	});
+}
+
 describe("Settings UI", function () {
 	let mainWindow: string;
 
 	beforeEach(async function () {
 		mainWindow = await browser.getWindowHandle();
 		await obsidianPage.resetVault("test/vaults/simple");
-		await setActions([]);
+		await seedActions([]);
 	});
 
 	afterEach(async function () {
@@ -141,7 +155,7 @@ describe("Settings UI", function () {
 	});
 
 	it("swaps the fields when What changes, and removes an action", async function () {
-		await setActions([
+		await seedActions([
 			{ where: "", when: "everyOpen", what: "property", propertyName: "stale", propertyValue: "x" },
 		]);
 		await openSettings();
@@ -180,5 +194,39 @@ describe("Settings UI", function () {
 		});
 		await closeSettings(mainWindow);
 		expect(await savedActions()).toEqual([]);
+	});
+
+	it("suggests commands in the Command field and saves the picked one", async function () {
+		await browser.executeObsidian(({ app }) => {
+			(app as unknown as { commands: { addCommand: (c: unknown) => void } }).commands.addCommand({
+				id: "sentinel-e2e:suggest-target",
+				name: "Sentinel e2e suggest target",
+				callback: () => {},
+			});
+		});
+		await seedActions([{ where: "", when: "everyOpen", what: "command", commandId: "" }]);
+		await openSettings();
+
+		await browser.waitUntil(async () => (await actionContainers()).length === 1, {
+			timeout: 5000,
+			timeoutMsg: "seeded action group never appeared",
+		});
+		const commandInput = await settingControl((await actionContainers())[0], "Command");
+		await commandInput.click();
+		await commandInput.setValue("e2e suggest");
+
+		const suggestion = await $(".suggestion-item*=Sentinel e2e suggest target");
+		await suggestion.waitForDisplayed({ timeout: 5000 });
+		await suggestion.click();
+		await browser.waitUntil(async () => (await commandInput.getValue()) === "sentinel-e2e:suggest-target", {
+			timeout: 5000,
+			timeoutMsg: "picking a suggestion did not fill in the command id",
+		});
+
+		await closeSettings(mainWindow);
+		await browser.waitUntil(async () => (await savedActions())[0]?.commandId === "sentinel-e2e:suggest-target", {
+			timeout: 5000,
+			timeoutMsg: "the picked command was never saved to data.json",
+		});
 	});
 });

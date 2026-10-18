@@ -119,6 +119,25 @@ export async function openNoteInNewTab(path: string): Promise<void> {
 	);
 }
 
+// Open a note in a new split pane next to the current one.
+export async function openNoteInSplit(path: string): Promise<void> {
+	await browser.executeObsidian(
+		async ({ app, obsidian }, path) => {
+			const file = app.vault.getAbstractFileByPath(path);
+			if (file instanceof obsidian.TFile) {
+				await app.workspace.getLeaf("split").openFile(file);
+			}
+		},
+		path,
+	);
+}
+
+// True when running the phone layout (mobile emulation on a narrow screen),
+// which has no split panes.
+export async function isPhone(): Promise<boolean> {
+	return await browser.executeObsidian(({ obsidian }) => obsidian.Platform.isPhone);
+}
+
 // Focus an already-open leaf showing the given note, without opening a new one
 // (fires active-leaf-change against an existing leaf, like clicking its tab).
 export async function focusNote(path: string): Promise<void> {

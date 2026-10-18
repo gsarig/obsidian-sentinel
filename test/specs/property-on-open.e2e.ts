@@ -1,7 +1,7 @@
 import { browser, expect } from "@wdio/globals";
 import { describe, it, beforeEach } from "mocha";
 import { obsidianPage } from "wdio-obsidian-service";
-import { setActions, createNote, openNote, openNoteInNewTab, frontmatterOf, waitForProperty } from "./helpers.js";
+import { setActions, createNote, openNote, openNoteInNewTab, openNoteInSplit, focusNote, isPhone, frontmatterOf, waitForProperty } from "./helpers.js";
 
 const SETTLE = Number(process.env.OBSIDIAN_E2E_SETTLE ?? 400);
 
@@ -62,5 +62,33 @@ describe("Set property on open", function () {
 		await browser.pause(SETTLE);
 
 		expect((await frontmatterOf("B.md"))?.views).toBe(1);
+	});
+
+	// Deliberate behavior agreed in #2: while a split view is open, moving
+	// between panes is not counted as accessing a note. #17 asked for the
+	// opposite, so this guards the decision against a well-meant "fix".
+	it("does not fire Accessing a note while a split view is open", async function () {
+		if (await isPhone()) {
+			this.skip(); // the phone layout has no split panes
+		}
+		await setActions([
+			{ when: "everyOpen", what: "property", propertyName: "views", propertyValue: "{{increment}}" },
+			// Control: proves B's open was processed at all. firstOpen is
+			// once per session, hence note names no other test uses.
+			{ when: "firstOpen", what: "property", propertyName: "seen", propertyValue: "yes" },
+		]);
+		await createNote("SplitA.md", "# A\n");
+		await createNote("SplitB.md", "# B\n");
+
+		await openNote("SplitA.md");
+		await waitForProperty("SplitA.md", "views", 1);
+
+		await openNoteInSplit("SplitB.md");
+		await waitForProperty("SplitB.md", "seen", "yes");
+		await focusNote("SplitA.md");
+		await browser.pause(SETTLE);
+
+		expect((await frontmatterOf("SplitB.md"))?.views).toBe(undefined);
+		expect((await frontmatterOf("SplitA.md"))?.views).toBe(1);
 	});
 });
