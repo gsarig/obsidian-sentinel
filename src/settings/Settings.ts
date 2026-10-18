@@ -172,8 +172,11 @@ export class SentinelSettings extends PluginSettingTab {
 
 	private async removeAction(index: number): Promise<void> {
 		this.plugin.settings.actions.splice(index, 1);
-		await this.plugin.saveSettings();
+		// Refresh before saving: the splice shifts indices, and controls still
+		// bound to the old "actions.N" keys would write into the wrong action
+		// if edited while the save is pending.
 		this.update();
+		await this.plugin.saveSettings();
 	}
 
 	private resourcesDescription(): DocumentFragment {
