@@ -1,4 +1,4 @@
-import { $, $$, browser, expect } from "@wdio/globals";
+import { $, $$, browser } from "@wdio/globals";
 import { describe, it, beforeEach, afterEach } from "mocha";
 import { obsidianPage } from "wdio-obsidian-service";
 import { setActions, createNote, openNote, waitForProperty, type SentinelAction } from "./helpers.js";
@@ -203,7 +203,11 @@ describe("Settings UI", function () {
 			timeoutMsg: "removed action group is still shown",
 		});
 		await closeSettings(mainWindow);
-		expect(await savedActions()).toEqual([]);
+		// The group disappears before the save finishes, so poll data.json.
+		await browser.waitUntil(async () => (await savedActions()).length === 0, {
+			timeout: 5000,
+			timeoutMsg: "the removed action was never deleted from data.json",
+		});
 	});
 
 	it("suggests commands in the Command field and saves the picked one", async function () {
