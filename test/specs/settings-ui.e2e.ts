@@ -46,6 +46,15 @@ async function openSettings(): Promise<void> {
 	if (settingsWindow) {
 		await browser.switchToWindow(settingsWindow);
 	}
+	// On mobile the settings modal slides in from the bottom; a click during
+	// that animation lands on the wrong spot and is silently lost.
+	await browser.waitUntil(
+		async () => browser.execute(() => {
+			const modal = document.querySelector(".modal.mod-settings");
+			return modal !== null && getComputedStyle(modal).transform === "none";
+		}),
+		{ timeout: 5000, timeoutMsg: "settings never finished opening" },
+	);
 }
 
 // Back to the main window before closing settings: the popout (if any) goes
